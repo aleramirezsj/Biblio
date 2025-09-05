@@ -18,5 +18,11 @@ namespace Service.Models
         [Required]
         [Column(TypeName = "text")]
         public string Sinopsis { get; set; } = string.Empty;
+        public bool IsDeleted { get; set; } = false;
+
+        public override string ToString()
+        {
+            return Titulo;
+        }
     }
 }
