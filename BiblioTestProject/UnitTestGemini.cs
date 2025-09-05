@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Service.DTOs;
 using Service.Services;
 using System.Text;
 using System.Text.Json;
@@ -13,6 +14,7 @@ namespace BiblioTestProject
         public async Task TestObtenerResumenLibroIA()
         {
             //leemos la clave de la api desde appsettings.json
+            await LoginTest();
 
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
@@ -59,9 +61,22 @@ namespace BiblioTestProject
 
 
         }
+
+        private async Task LoginTest()
+        {
+            var configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json")
+                .Build();
+            var serviceAuth = new AuthService(configuration);
+            var token = await serviceAuth.Login(new LoginDTO { Username = "aleramirezsj@gmail.com", Password = "123456" });
+            Console.WriteLine($">>>>>>>>>>>>>>>>>>>>>>>>>>Token: {token}");
+            GeminiService.jwtToken = token;
+        }
+
         [Fact]
         public async Task TestServiceGeminiGetPrompt()
         {
+            await LoginTest();
             //leemos la api key desde appsettings.json
             var configuration = new ConfigurationBuilder()
                   .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)

@@ -1,13 +1,15 @@
 using Backend.DataContext;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Service.Models;
 using Service.ExtentionMethods;
+using Service.Models;
 
 namespace Backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class UsuarioCarrerasController : ControllerBase
     {
         private readonly BiblioContext _context;

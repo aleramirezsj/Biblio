@@ -3,6 +3,7 @@ using Service.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
@@ -15,7 +16,7 @@ namespace Service.Services
         private readonly HttpClient _httpClient;
         private readonly string _endpoint;
         protected readonly JsonSerializerOptions _options;
-
+        public static string? jwtToken = string.Empty;
 
         public GenericService(HttpClient? httpClient=null)
         {
@@ -23,16 +24,32 @@ namespace Service.Services
             _options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             _endpoint = Properties.Resources.UrlApiLocal+ApiEndpoints.GetEndpoint(typeof(T).Name);
 
+            if (!string.IsNullOrEmpty(GenericService<object>.jwtToken))
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GenericService<object>.jwtToken);
+            else
+                throw new ArgumentException("Error Token no definido", nameof(GenericService<object>.jwtToken));
+
         }
 
-        public Task<T?> AddAsync(T? entity)
+        public async Task<T?> AddAsync(T? entity)
         {
-            throw new NotImplementedException();
+            var response = await _httpClient.PostAsJsonAsync(_endpoint, entity);
+            var content = await response.Content.ReadAsStringAsync();
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Error al agregar el dato: {response.StatusCode} - {content}");
+            }
+            return JsonSerializer.Deserialize<T>(content, _options);
         }
 
-        public Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(int id)
         {
-            throw new NotImplementedException();
+            var response = await _httpClient.DeleteAsync($"{_endpoint}/{id}");
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Error al eliminar el dato: {response.StatusCode}");
+            }
+            return response.IsSuccessStatusCode;
         }
 
         public async Task<List<T>?> GetAllAsync(string? filtro="")
@@ -49,24 +66,50 @@ namespace Service.Services
             }
         }
 
-        public Task<List<T>?> GetAllDeletedsAsync()
+        public async Task<List<T>?> GetAllDeletedsAsync()
         {
-            throw new NotImplementedException();
+            var response = await _httpClient.GetAsync($"{_endpoint}/deleteds");
+            var content = await response.Content.ReadAsStringAsync();
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Error al obtener los datos: {response.StatusCode}");
+            }
+            return JsonSerializer.Deserialize<List<T>>(content, _options);
         }
 
-        public Task<T?> GetByIdAsync(int id)
+        public async Task<T?> GetByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            var response = await _httpClient.GetAsync($"{_endpoint}/{id}");
+            var content = await response.Content.ReadAsStringAsync();
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Error al obtener los datos: {response.StatusCode}");
+            }
+            return JsonSerializer.Deserialize<T>(content, _options);
         }
 
-        public Task<bool> RestoreAsync(int id)
+        public async Task<bool> RestoreAsync(int id)
         {
-            throw new NotImplementedException();
+            var response = await _httpClient.PutAsync($"{_endpoint}/restore/{id}", null);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Error al restaurar el dato: {response.StatusCode}");
+            }
+            return response.IsSuccessStatusCode;
         }
 
-        public Task<bool> UpdateAsync(T? entity)
+        public async Task<bool> UpdateAsync(T? entity)
         {
-            throw new NotImplementedException();
+            var idValue = entity.GetType().GetProperty("Id").GetValue(entity);
+            var response = await _httpClient.PutAsJsonAsync($"{_endpoint}/{idValue}", entity);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception("Hubo un problema al actualizar");
+            }
+            else
+            {
+                return response.IsSuccessStatusCode;
+            }
         }
     }
 }
