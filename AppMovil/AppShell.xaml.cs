@@ -1,4 +1,6 @@
 ﻿using AppMovil.ViewModels;
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Controls.PlatformConfiguration.iOSSpecific;
 using Service.Models;
 
 namespace AppMovil
@@ -16,7 +18,9 @@ namespace AppMovil
         public void SetLoginState(bool isLoggedIn)
         {
             ViewModel.SetLoginState(isLoggedIn);
+            
         }
+
 
         public void SetUserLogin(Usuario usuario)
         {

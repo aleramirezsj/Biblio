@@ -7,9 +7,11 @@
         <viewModels:LoginViewModel />
     </ContentPage.BindingContext>
     <StackLayout Padding="30">
+
         <Label Text="Iniciar sesion" FontSize="24" HorizontalOptions="Center"/>
         <Entry Placeholder="Usuario" Text="{Binding Username}"/>
         <Entry Placeholder="Contrasena" IsPassword="True" Text="{Binding Password}"/>
         <Button Text="Ingresar" Command="{Binding LoginCommand}"/>
+        <ActivityIndicator IsRunning="{Binding IsBusy}"/>
     </StackLayout>
 </ContentPage>
