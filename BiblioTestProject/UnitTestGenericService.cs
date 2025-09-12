@@ -24,10 +24,7 @@ namespace BiblioTestProject
 
         private async Task LoginTest()
         {
-            var configuration = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json")
-                .Build();
-            var serviceAuth = new AuthService(configuration);
+            var serviceAuth = new AuthService();
             var token = await serviceAuth.Login(new LoginDTO { Username = "aleramirezsj@gmail.com", Password = "123456" });
             Console.WriteLine($">>>>>>>>>>>>>>>>>>>>>>>>>>Token: {token}");
             GenericService<object>.jwtToken = token;

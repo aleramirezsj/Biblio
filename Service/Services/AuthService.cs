@@ -13,13 +13,13 @@ namespace Service.Services
 {
     public class AuthService : IAuthService
     {
-        private readonly IConfiguration _configuration;
-
-        public AuthService(IConfiguration configuration)
+        public AuthService()
         {
-            _configuration = configuration;
 
         }
+        //si no recibo el objeto IConfiguration en el constructor, creo un constructor vacio que instancie uno y lea el archivo appsettings.json
+
+
         public async Task<string?> Login(LoginDTO? login)
         {
             if (login==null)
@@ -28,7 +28,7 @@ namespace Service.Services
             }
             try
             {
-                var urlApi = _configuration["UrlApi"];
+                var urlApi = Properties.Resources.UrlApi;
                 var endpointAuth = ApiEndpoints.GetEndpoint("Login");
                 var client = new HttpClient();
                 var response = await client.PostAsJsonAsync($"{urlApi}{endpointAuth}/login/",login);
