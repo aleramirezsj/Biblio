@@ -27,7 +27,6 @@ namespace BiblioTestProject
             var serviceAuth = new AuthService();
             var token = await serviceAuth.Login(new LoginDTO { Username = "aleramirezsj@gmail.com", Password = "123456" });
             Console.WriteLine($">>>>>>>>>>>>>>>>>>>>>>>>>>Token: {token}");
-            GenericService<object>.jwtToken = token;
         }
 
         //test GetAllAsync method of GenericService

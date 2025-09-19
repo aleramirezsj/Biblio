@@ -11,7 +11,7 @@
         <CollectionView ItemsSource="{Binding Prestamos}">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Label Text="{Binding .}"/>
+                    <Label Text="{Binding . }"/>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>

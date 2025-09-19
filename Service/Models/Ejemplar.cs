@@ -18,5 +18,10 @@ namespace Service.Models
         public EstadoEnum Estado { get; set; } = EstadoEnum.Excelente; // "Excelente", "Muy Bueno".
         public bool IsDeleted { get; set; } = false;
 
+        public override string ToString()
+        {
+            return $"{Libro?.Titulo} ";
+        }
+
     }
 }

@@ -72,6 +72,7 @@ namespace AppMovil.ViewModels
                     ErrorMessage = "No se pudo obtener la información del usuario.";
                     return;
                 }
+                Preferences.Set("UserLoginId", usuario.Id);
                 // PERMITE CUALQUIER USUARIO/CONTRASEÑA durante desarrollo
                 // Solo requiere que no estén vacíos
                 if (Application.Current?.MainPage is AppShell shell)

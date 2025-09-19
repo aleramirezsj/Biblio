@@ -8,11 +8,13 @@
     </ContentPage.BindingContext>
     <StackLayout Padding="20">
         <Label Text="Buscar Libros" FontSize="24" HorizontalOptions="Center"/>
-        <SearchBar Placeholder="Buscar por titulo o autor" Text="{Binding SearchText}"/>
+        <SearchBar Placeholder="Buscar por titulo o autor" Text="{Binding SearchText}" 
+                   SearchCommand="{Binding BuscarCommand}" IsEnabled="True"/>
+        <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
         <CollectionView ItemsSource="{Binding Libros}">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Label Text="{Binding .}"/>
+                    <Label Text="{Binding Titulo}"/>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>

@@ -20,8 +20,8 @@ namespace Service.Services
         public GeminiService(IConfiguration configuration)
         {
             _configuration = configuration;
-            if (!string.IsNullOrEmpty(GeminiService.jwtToken))
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GeminiService.jwtToken);
+            if (!string.IsNullOrEmpty(GenericService<object>.jwtToken))
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GenericService<object>.jwtToken);
             else
                 throw new ArgumentException("Error Token no definido", nameof(GenericService<object>.jwtToken));
 
