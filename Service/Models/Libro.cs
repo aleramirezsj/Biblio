@@ -20,6 +20,10 @@ namespace Service.Models
         public string Sinopsis { get; set; } = string.Empty;
         public bool IsDeleted { get; set; } = false;
 
+        virtual public ICollection<Autor> Autores { get; set; } = new List<Autor>();
+        virtual public ICollection<Genero> Generos { get; set; } = new List<Genero>();
+
+
         public override string ToString()
         {
             return Titulo;

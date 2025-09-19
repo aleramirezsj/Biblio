@@ -12,25 +12,43 @@ namespace AppMovil.ViewModels
     public partial class BuscarLibrosViewModel : ObservableObject
     {
         GenericService<Libro> _libroService = new GenericService<Libro>();
+
         [ObservableProperty]
-        //[NotifyCanExecuteChangedFor(nameof(BuscarCommand))]
         private string searchText = string.Empty;
 
         [ObservableProperty]
         private bool isBusy;
 
-        private List<string> _todosLosLibros = new List<string>();
+        [ObservableProperty]
+        private ObservableCollection<Libro> libros = new();
+
+        // Propiedades para los filtros
+        [ObservableProperty]
+        private bool filtrarPorTitulo = true;
 
         [ObservableProperty]
-        private ObservableCollection<Libro> libros= new();
+        private bool filtrarPorAutor = false;
+
+        [ObservableProperty]
+        private bool filtrarPorEditorial = false;
+
+        [ObservableProperty]
+        private bool filtrarPorGenero = false;
+
+        [ObservableProperty]
+        private bool mostrarFiltros = false;
+
+        private List<Libro> _todosLosLibros = new();
+
         public IRelayCommand BuscarCommand { get; }
+        public IRelayCommand LimpiarCommand { get; }
+        public IRelayCommand ToggleFiltrosCommand { get; }
 
         public BuscarLibrosViewModel()
         {
-            // Simulación de datos iniciales
             BuscarCommand = new RelayCommand(OnBuscar);
-
-            // Cargar todos los libros inicialmente de forma asíncrona
+            LimpiarCommand = new RelayCommand(OnLimpiar);
+            ToggleFiltrosCommand = new RelayCommand(OnToggleFiltros);
             _ = InicializarAsync();
         }
 
@@ -41,8 +59,15 @@ namespace AppMovil.ViewModels
 
         partial void OnSearchTextChanged(string value)
         {
-            if(string.IsNullOrEmpty(value)) OnBuscar();
+            if (string.IsNullOrEmpty(value)) OnBuscar();
         }
+
+        // Los cambios en filtros también disparan nueva búsqueda
+        partial void OnFiltrarPorTituloChanged(bool value) => OnBuscar();
+        partial void OnFiltrarPorAutorChanged(bool value) => OnBuscar();
+        partial void OnFiltrarPorEditorialChanged(bool value) => OnBuscar();
+        partial void OnFiltrarPorGeneroChanged(bool value) => OnBuscar();
+        
 
         private async void OnBuscar()
         {
@@ -51,8 +76,18 @@ namespace AppMovil.ViewModels
             try
             {
                 IsBusy = true;
-                var libros = await _libroService.GetAllAsync(SearchText);
-                Libros= new ObservableCollection<Libro>(libros ?? new List<Libro>());
+
+                // Obtener todos los libros si no los tenemos
+                if (!_todosLosLibros.Any())
+                {
+                    var todosLibros = await _libroService.GetAllAsync("");
+                    _todosLosLibros = todosLibros?.ToList() ?? new List<Libro>();
+                }
+
+                // Filtrar según el texto de búsqueda y los filtros seleccionados
+                var librosFiltrados = FiltrarLibros(_todosLosLibros);
+
+                Libros = new ObservableCollection<Libro>(librosFiltrados);
             }
             finally
             {
@@ -60,8 +95,18 @@ namespace AppMovil.ViewModels
             }
         }
 
+        
 
+        private void OnLimpiar()
+        {
+            SearchText = string.Empty;
+            // Mantener los filtros pero ejecutar búsqueda limpia
+            OnBuscar();
+        }
 
-
+        private void OnToggleFiltros()
+        {
+            MostrarFiltros = !MostrarFiltros;
+        }
     }
 }

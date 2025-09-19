@@ -119,7 +119,7 @@ Eres un asistente experto en catalogación bibliográfica. Analiza EXCLUSIVAMENT
                             new {
                                 inline_data = new {
                                     mime_type = req.Image.ContentType ?? "image/jpeg",
-                                    data = base64
+                                    //data = base64
                                 }
                             }
                         }

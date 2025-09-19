@@ -2,6 +2,7 @@ using Backend.DataContext;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Service.DTOs;
 using Service.Models;
 
 namespace Backend.Controllers
@@ -22,7 +23,32 @@ namespace Backend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Libro>>> GetLibros([FromQuery] string filtro="")
         {
-            return await _context.Libros.AsNoTracking().Where(l=>l.Titulo.Contains(filtro)).ToListAsync();
+            return await _context.Libros.Include(l=>l.Editorial).Include(l=>l.Autores).Include(l=>l.Generos).AsNoTracking().Where(l=>l.Titulo.Contains(filtro)).ToListAsync();
+        }
+
+        [HttpPost("withfilter")]
+        public async Task<ActionResult<IEnumerable<Libro>>> GetLibroswithfilter(FilterLibroDTO filter)
+        {
+            var query = _context.Libros
+                .Include(l => l.Editorial)
+                .Include(l => l.Generos)
+                .Include(l => l.Autores)
+                .AsNoTracking()
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(filter.SearchText))
+            {
+                var search = filter.SearchText.ToLower();
+
+                query = query.Where(l =>
+                    (filter.ForTitulo && l.Titulo.ToLower().Contains(search)) ||
+                    (filter.ForEditorial && l.Editorial != null && l.Editorial.Nombre.ToLower().Contains(search)) ||
+                    (filter.ForAutor && l.Autores.Any(la => la.Nombre.ToLower().Contains(search))) ||
+                    (filter.ForGenero && l.Generos.Any(lg => lg.Nombre.ToLower().Contains(search)))
+                );
+            }
+
+            return await query.ToListAsync();
         }
 
         [HttpGet("deleteds")]
