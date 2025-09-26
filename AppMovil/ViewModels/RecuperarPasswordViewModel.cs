@@ -9,6 +9,7 @@ namespace AppMovil.ViewModels
     {
         AuthService authService = new AuthService();
         [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(EnviarCommand))]
         private string mail = string.Empty;
 
         [ObservableProperty]
@@ -31,7 +32,7 @@ namespace AppMovil.ViewModels
 
         private bool CanEnviar()
         {
-            return !IsBusy && !string.IsNullOrWhiteSpace(Mail);
+            return !string.IsNullOrWhiteSpace(Mail);
         }
 
         private async Task OnEnviar()
@@ -69,6 +70,7 @@ namespace AppMovil.ViewModels
                 IsBusy = false;
             }
         }
+
 
         private async Task OnVolver()
         {

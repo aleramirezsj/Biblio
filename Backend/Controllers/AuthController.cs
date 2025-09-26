@@ -53,12 +53,10 @@ namespace Backend.Controllers
         }
 
         [HttpPost("resetpassword")]
-        [Authorize]
         public async Task<IActionResult> ResetPassword([FromBody] LoginDTO login)
         {
             try
             {
-                
                 await firebaseAuthClient.ResetEmailPasswordAsync(login.Username);
                 return Ok();
             }
