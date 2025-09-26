@@ -25,7 +25,7 @@ namespace BiblioTestProject
         private async Task LoginTest()
         {
             var serviceAuth = new AuthService();
-            var token = await serviceAuth.Login(new LoginDTO { Username = "aleramirezsj@gmail.com", Password = "123456" });
+            var token = await serviceAuth.Login(new LoginDTO { Username = "aleramirezsj@gmail.com", Password = "234567" });
             Console.WriteLine($">>>>>>>>>>>>>>>>>>>>>>>>>>Token: {token}");
         }
 

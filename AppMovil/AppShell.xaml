@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:AppMovil"
     xmlns:viewModels="clr-namespace:AppMovil.ViewModels"
+    xmlns:pages="clr-namespace:AppMovil.Pages"
     Shell.FlyoutBehavior="Disabled"
     Title="Biblioteca Digital">
 
@@ -25,9 +26,15 @@
     <!-- Pantalla de Login -->
     <ShellContent
         Title="Login"
-        ContentTemplate="{DataTemplate local:LoginPage}"
+        ContentTemplate="{DataTemplate pages:LoginPage}"
         Route="LoginPage"
         IsVisible="{Binding LoginVisible}"
+        FlyoutItemIsVisible="False" />
+    <ShellContent
+        Title="Reseteo de Password"
+        ContentTemplate="{DataTemplate pages:RecuperarPasswordPage}"
+        Route="ResetPassword"
+        IsVisible="{Binding ResetPasswordVisible}"
         FlyoutItemIsVisible="False" />
 
     <!-- Menu Principal - Solo visible cuando está logueado -->
