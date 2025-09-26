@@ -1,10 +1,12 @@
-﻿namespace AppMovil.Pages
+﻿using AppMovil.ViewModels;
+
+namespace AppMovil.Pages;
+
+public partial class RecuperarPasswordPage : ContentPage
 {
-    public partial class RecuperarPasswordPage : ContentPage
+    public RecuperarPasswordPage()
     {
-        public RecuperarPasswordPage()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }
+
