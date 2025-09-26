@@ -1,10 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Service.DTOs;
+using Service.Services;
 
 namespace AppMovil.ViewModels
 {
     public partial class RecuperarPasswordViewModel : ObservableObject
     {
+        AuthService authService = new AuthService();
         [ObservableProperty]
         private string mail = string.Empty;
 
@@ -47,8 +50,13 @@ namespace AppMovil.ViewModels
                     ErrorMessage = "Por favor, ingrese un correo electrónico válido";
                     return;
                 }
+                LoginDTO loginReset= new LoginDTO
+                {
+                    Username = Mail,
+                    Password = "" // Placeholder, el backend debe manejar esto adecuadamente
+                };
 
-
+                await authService.ResetPassword(loginReset);
 
                 await OnVolver();
             }
