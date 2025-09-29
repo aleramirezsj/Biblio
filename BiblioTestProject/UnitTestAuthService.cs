@@ -31,5 +31,20 @@ namespace BiblioTestProject
             Assert.True(result);
 
         }
+        [Fact]
+        public async Task Create_User_Works_Correctly()
+        {
+            // Arrange
+            await LoginTest();
+            var serviceAuth = new AuthService();
+            var random = new Random();
+            var email = $"testuser{random.Next(1000, 9999)}@example.com";
+            var password = "TestPassword123!";
+            var nombre = "Test User";
+            // Act
+            var result = await serviceAuth.CreateUserWithEmailAndPasswordAsync(email, password, nombre);
+            // Assert
+            Assert.True(result);
+        }
     }
 }

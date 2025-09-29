@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Service.DTOs;
 using Service.Models;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace Backend.Controllers
@@ -15,6 +16,7 @@ namespace Backend.Controllers
     {
         FirebaseAuthClient firebaseAuthClient;
         IConfiguration _configuration;
+        FirebaseAuthConfig _config;
 
         public AuthController(IConfiguration configuration)
         {
@@ -24,18 +26,18 @@ namespace Backend.Controllers
 
         private void SetFirebaseConfig()
         {
-            var config = new FirebaseAuthConfig
+            
+         _config = new FirebaseAuthConfig
             {
                 ApiKey = _configuration["ApiKeyFirebase"],
                 AuthDomain = _configuration["AuthDomainFirebase"],
                 Providers = new FirebaseAuthProvider[]
                 {
                     new EmailProvider()
-
                 },
             };
 
-            firebaseAuthClient = new FirebaseAuthClient(config);
+            firebaseAuthClient = new FirebaseAuthClient(_config);
         }
 
         [HttpPost("login")]
@@ -49,7 +51,21 @@ namespace Backend.Controllers
             {
                 return BadRequest(new { message = ex.Reason.ToString() });
             }
-            
+        }
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterDTO register)
+        {
+            try
+            {
+                var user = await firebaseAuthClient.CreateUserWithEmailAndPasswordAsync(register.Email, register.Password, register.Nombre);
+                await SendVerificationEmailAsync(user.User.GetIdTokenAsync().Result);
+                return Ok(user);
+            }
+            catch (FirebaseAuthException ex)
+            {
+                return BadRequest(new { message = ex.Reason.ToString() });
+            }
         }
 
         [HttpPost("resetpassword")]
@@ -64,7 +80,24 @@ namespace Backend.Controllers
             {
                 return BadRequest(new { message = ex.Reason.ToString() });
             }
-
         }
+
+        private async Task SendVerificationEmailAsync(string idToken)
+        {
+            var RequestUri = "https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=" + _config.ApiKey;
+            using (var client = new HttpClient())
+            {
+
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                var content = new StringContent("{\"requestType\":\"VERIFY_EMAIL\",\"idToken\":\"" + idToken + "\"}");
+                content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+                var response = await client.PostAsync(RequestUri, content);
+                response.EnsureSuccessStatusCode();
+            }
+        }
+
+
     }
 }
