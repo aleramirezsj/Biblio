@@ -12,6 +12,8 @@ namespace AppMovil.ViewModels
         AuthService _authService= new();
         UsuarioService _usuarioService= new();
         public IRelayCommand RegistrarseCommand { get; }
+        public IRelayCommand VolverCommand { get; }
+
 
         [ObservableProperty]
         private string nombre;
@@ -25,13 +27,24 @@ namespace AppMovil.ViewModels
         [ObservableProperty]
         private string verifyPassword;
 
+        [ObservableProperty]
+        private bool isBusy;
+
         public RegistrarseViewModel()
         {
             RegistrarseCommand = new RelayCommand(Registrarse);
+            VolverCommand = new AsyncRelayCommand(OnVolver);
+        }
+
+        private async Task OnVolver()
+        {
+            await Shell.Current.GoToAsync("//LoginPage");
         }
 
         private async void Registrarse()
         {
+            if (IsBusy) return;
+            IsBusy = true;
             if (Password != VerifyPassword)
             {
                 await Application.Current.MainPage.DisplayAlert("Registrarse", "Las contraseñas ingresadas no coinciden", "Ok");
@@ -59,7 +72,11 @@ namespace AppMovil.ViewModels
                 await Application.Current.MainPage.DisplayAlert("Registrarse", "Ocurrió un problema:" + error.Reason, "Ok");
 
             }
-            
+            finally
+            {
+                IsBusy = false;
+            }
+
         }
     }
 }

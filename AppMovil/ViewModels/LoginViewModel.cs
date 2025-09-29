@@ -85,9 +85,10 @@ namespace AppMovil.ViewModels
                     Password = this.Password
                 });
 
-                if(!response)
+                if(response!=null)
                 {
-                    ErrorMessage = "Usuario o contraseña incorrectos.";
+                    ErrorMessage = response;
+
                     return;
                 }
                
@@ -115,15 +116,16 @@ namespace AppMovil.ViewModels
             }
         }
 
-        partial void OnErrorMessageChanged(string? oldValue, string newValue)
+        partial void OnErrorMessageChanged(string value)
         {
-            if (!string.IsNullOrEmpty(newValue))
+            if (!string.IsNullOrEmpty(value))
             {
                 // Mostrar mensaje de error en una alerta
-                Application.Current?.MainPage?.DisplayAlert("Error de inicio de sesión", newValue, "OK");
+                Application.Current?.MainPage?.DisplayAlert("Error de inicio de sesión", value, "OK");
             }
-
         }
+        
+
 
     }
 }

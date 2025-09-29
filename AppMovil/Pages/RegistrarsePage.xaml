@@ -11,10 +11,20 @@
         <VerticalStackLayout Margin="20">
             <Label 
              FontSize="Title"
-             Text="Creando nueva cuenta en KioscoInformáticoApp"
+             Text="Creando nueva cuenta en Biblio"
              VerticalOptions="Center" 
              HorizontalOptions="Center" />
-            <Grid RowDefinitions="2*,2*,2*,2*,*" ColumnDefinitions="*,*">
+            <!-- Botón volver -->
+            <Button Text="←"
+                 Command="{Binding VolverCommand}"
+                 BackgroundColor="Transparent"
+                 TextColor="White"
+                 FontSize="24"
+                 HorizontalOptions="Start"
+                 WidthRequest="50"
+                 HeightRequest="50"
+                 Margin="0,0,0,20"/>
+            <Grid RowDefinitions="2*,2*,2*,2*,*,*" ColumnDefinitions="*,*">
                 <Label Grid.Row="0" Grid.Column="0" 
                     HorizontalTextAlignment="End"
                     VerticalTextAlignment="Center"
@@ -52,6 +62,8 @@
                      Grid.ColumnSpan="2"
                      Margin="100,10"
                      ></Button>
+                <ActivityIndicator IsRunning="{Binding IsBusy}"
+                                   Grid.Row="5" Grid.ColumnSpan="2"/>
             </Grid>
         </VerticalStackLayout>
     </ScrollView>

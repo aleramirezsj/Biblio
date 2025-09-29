@@ -55,7 +55,7 @@ namespace Service.Services
         //si no recibo el objeto IConfiguration en el constructor, creo un constructor vacio que instancie uno y lea el archivo appsettings.json
 
 
-        public async Task<bool> Login(LoginDTO? login)
+        public async Task<string?> Login(LoginDTO? login)
         {
             if (login==null)
             {
@@ -72,11 +72,13 @@ namespace Service.Services
                     var result = await response.Content.ReadAsStringAsync();
                      
                     GenericService<object>.jwtToken = result;   
-                    return true;
+                    return null;
                 }
                 else
                 {
-                    return false;
+                    //si no es exitoso, devuelvo el mensaje de error
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    return errorContent;
                 }
             }
             catch (Exception ex)
