@@ -1,20 +1,16 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Firebase.Auth;
-using Firebase.Auth.Providers;
+using Service.Enums;
+using Service.Models;
 using Service.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace KioscoInformaticoApp.ViewModels
+namespace AppMovil.ViewModels
 {
     public partial class RegistrarseViewModel : ObservableObject
     {
-        AuthService _authService;
+        AuthService _authService= new();
+        UsuarioService _usuarioService= new();
         public IRelayCommand RegistrarseCommand { get; }
 
         [ObservableProperty]
@@ -36,7 +32,7 @@ namespace KioscoInformaticoApp.ViewModels
 
         private async void Registrarse()
         {
-            if (password != verifyPassword)
+            if (Password != VerifyPassword)
             {
                 await Application.Current.MainPage.DisplayAlert("Registrarse", "Las contraseñas ingresadas no coinciden", "Ok");
                 return;
@@ -44,10 +40,19 @@ namespace KioscoInformaticoApp.ViewModels
 
             try
             {
-                var user = await _authService.CreateUserWithEmailAndPasswordAsync(mail, password, nombre);
-
-                await Application.Current.MainPage.DisplayAlert("Registrarse", "Cuenta creada!", "Ok");
-                await Shell.Current.GoToAsync("//Login");
+                var user = await _authService.CreateUserWithEmailAndPasswordAsync(Mail, Password, Nombre);
+                if (user == false)
+                {
+                    await Application.Current.MainPage.DisplayAlert("Registrarse", "No se pudo crear el usuario", "Ok");
+                    return;
+                }
+                else
+                {
+                    var newUser = new Usuario { Nombre = Nombre, Email = Mail, TipoRol = TipoRolEnum.Alumno, Dni = "12345678", Password = Password };
+                    await _usuarioService.AddAsync(newUser);
+                    await Application.Current.MainPage.DisplayAlert("Registrarse", "Cuenta creada!", "Ok");
+                    await Shell.Current.GoToAsync("//LoginPage");
+                }
             }
             catch (FirebaseAuthException error) // Use alias here 
             {

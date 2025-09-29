@@ -36,6 +36,12 @@
         Route="ResetPassword"
         IsVisible="{Binding ResetPasswordVisible}"
         FlyoutItemIsVisible="False" />
+    <ShellContent
+        Title="Crear cuenta"
+        ContentTemplate="{DataTemplate pages:RegistrarsePage}"
+        Route="RegistrarsePage"
+        IsVisible="{Binding RegistrarseVisible}"
+        FlyoutItemIsVisible="False" />
 
     <!-- Menu Principal - Solo visible cuando está logueado -->
     <FlyoutItem Title="🏠 Inicio" Icon="home.png" IsVisible="{Binding MenuVisible}">

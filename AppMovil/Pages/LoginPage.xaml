@@ -18,6 +18,7 @@
                 <TapGestureRecognizer Command="{Binding ForgotPasswordCommand}" />
             </Label.GestureRecognizers>
         </Label>
+        <Button Text="Registrarse" Command="{Binding RegisterCommand}"/>
         <ActivityIndicator IsRunning="{Binding IsBusy}"/>
     </StackLayout>
 </ContentPage>

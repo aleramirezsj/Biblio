@@ -37,6 +37,7 @@ namespace Service.Services
                 if (response.IsSuccessStatusCode)
                 {
                     var result = await response.Content.ReadAsStringAsync();
+                    GenericService<object>.jwtToken = result;
                     return true;
                 }
                 else
