@@ -94,7 +94,7 @@ else
             var user = await _firebaseAuthService.SignInWithEmailPassword(email, password, rememberPassword);
             if (user != null)
             {
-                if(user.IsEmailVerified == false)
+                if(user.EmailVerified == false)
                 {
                     await _sweetAlert.FireAsync("Verificación de correo", "Por favor, verifica tu correo electrónico antes de iniciar sesión.", SweetAlertIcon.Warning);
                     return;

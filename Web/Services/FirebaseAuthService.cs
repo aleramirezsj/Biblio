@@ -1,5 +1,6 @@
 ﻿using Firebase.Auth;
 using Microsoft.JSInterop;
+using Service.Models.Login;
 using Service.Services;
 
 namespace Web.Services
@@ -8,16 +9,16 @@ namespace Web.Services
     {
         private readonly IJSRuntime _jsRuntime;
         public event Action OnChangeLogin;
-        public UserInfo CurrentUser { get; set; }
+        public FirebaseUser CurrentUser { get; set; }
 
         public FirebaseAuthService(IJSRuntime jsRuntime)
         {
             _jsRuntime = jsRuntime;
         }
 
-        public async Task<UserInfo?> SignInWithEmailPassword(string email, string password, bool rememberPassword)
+        public async Task<FirebaseUser?> SignInWithEmailPassword(string email, string password, bool rememberPassword)
         {
-            var user = await _jsRuntime.InvokeAsync<UserInfo?>("firebaseAuth.signInWithEmailPassword", email, password, rememberPassword);
+            var user = await _jsRuntime.InvokeAsync<FirebaseUser?>("firebaseAuth.signInWithEmailPassword", email, password, rememberPassword);
             if (user != null)
             {
                 CurrentUser = user;
@@ -43,9 +44,9 @@ namespace Web.Services
             OnChangeLogin?.Invoke();
         }
 
-        public async Task<UserInfo?> GetUserFirebase()
+        public async Task<FirebaseUser?> GetUserFirebase()
         {
-            var userFirebase = await _jsRuntime.InvokeAsync<UserInfo>("firebaseAuth.getUserFirebase");
+            var userFirebase = await _jsRuntime.InvokeAsync<FirebaseUser>("firebaseAuth.getUserFirebase");
             CurrentUser = userFirebase;
             return userFirebase;
         }
@@ -69,9 +70,9 @@ namespace Web.Services
             return user != null;
         }
 
-        public async Task<UserInfo?> LoginWithGoogle()
+        public async Task<FirebaseUser?> LoginWithGoogle()
         {
-            var userFirebase = await _jsRuntime.InvokeAsync<UserInfo>("firebaseAuth.loginWithGoogle");
+            var userFirebase = await _jsRuntime.InvokeAsync<FirebaseUser>("firebaseAuth.loginWithGoogle");
             CurrentUser = userFirebase;
             OnChangeLogin?.Invoke();
             return userFirebase;
