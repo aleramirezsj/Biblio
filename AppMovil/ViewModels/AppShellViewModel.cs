@@ -13,50 +13,32 @@ namespace AppMovil.ViewModels
         [ObservableProperty]
         private bool isLoggedIn;
 
-        [ObservableProperty]
-        private bool loginVisible = true;
-
-        [ObservableProperty]
-        private bool menuVisible = false;
-
-        [ObservableProperty]
-        private bool resetPasswordVisible = false;
-
-        [ObservableProperty]
-        private bool registrarseVisible = false;
-
         public Usuario? Usuario { get; private set; }
 
-        partial void OnIsLoggedInChanged(bool value)
-        {
-            LoginVisible = !value;
-            MenuVisible = value;
-        }
 
         public IRelayCommand LogoutCommand { get; }
 
         public AppShellViewModel()
         {
             LogoutCommand = new RelayCommand(OnLogout);
+            SetLoginState(false); // Inicialmente no está logueado
         }
 
         public void SetLoginState(bool isLoggedIn)
         {
-            if (isLoggedIn)
-                Shell.Current.FlyoutBehavior = FlyoutBehavior.Flyout;
-            else
-                Shell.Current.FlyoutBehavior = FlyoutBehavior.Disabled;
+            if (Application.Current?.MainPage is AppShell shell)
+            {
+                if (isLoggedIn)
+                    Shell.Current.FlyoutBehavior = FlyoutBehavior.Flyout;
+                else
+                    Shell.Current.FlyoutBehavior = FlyoutBehavior.Disabled;
 
-            IsLoggedIn = isLoggedIn;
-            if (isLoggedIn)
-                Shell.Current.GoToAsync("//MainPage");  // Cambio a MainPage (pantalla de inicio)
-            else if(ResetPasswordVisible)
-                Shell.Current.GoToAsync("//ResetPassword");
-            else if(RegistrarseVisible)
-                Shell.Current.GoToAsync("//RegistrarsePage");
-            else
-                Shell.Current.GoToAsync("//LoginPage");
-            
+                IsLoggedIn = isLoggedIn;
+                if (isLoggedIn)
+                    Shell.Current.GoToAsync("//MainPage");  // Cambio a MainPage (pantalla de inicio)
+                else
+                    Shell.Current.GoToAsync("//LoginPage");
+            }
                 
         }
 

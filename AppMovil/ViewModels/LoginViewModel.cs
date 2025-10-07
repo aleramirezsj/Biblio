@@ -46,8 +46,7 @@ namespace AppMovil.ViewModels
         {
             if (Application.Current?.MainPage is AppShell shell)
             {
-                shell.ViewModel.RegistrarseVisible = true;
-                shell.SetLoginState(false);
+                Shell.Current.GoToAsync("//RegistrarsePage");
             }
         }
 
@@ -56,8 +55,7 @@ namespace AppMovil.ViewModels
             //tomo referencia del shell actual
             if (Application.Current?.MainPage is AppShell shell)
             {
-                shell.ViewModel.ResetPasswordVisible = true;
-                shell.SetLoginState(false);
+                Shell.Current.GoToAsync("//ResetPassword");
             }
 
 

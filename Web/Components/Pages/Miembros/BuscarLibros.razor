@@ -1,0 +1,71 @@
+﻿@page "/miembros/buscar-libros"
+@inject ILibroService _libroService
+@rendermode InteractiveServer
+
+@if(Libros==null)
+{
+    <div class="d-flex align-items-center justify-content-center" style="height: 100vh;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+    </div>
+}
+else
+{
+@* --- Encabezado --- *@
+<div class="container py-4">
+        <EncabezadoPage Titulo="🔍 Buscar Libros" Descripcion="Encuentra libros en nuestro catálogo" />
+
+    @* --- Sección de búsqueda --- *@
+    <SeccionBusqueda Libros="Libros" OnBuscar="Buscar" />
+
+    @* --- Sección de resultados --- *@
+    <div class="row">
+        <div class="col-12">
+                <ResultadoBusqueda Cantidad="Libros.Count" TextoResultado="@(Libros.Count == 1 ? "libro encontrado" : "libros encontrados")" />
+            @if (Libros.Count == 0 && !IsBusy)
+            {
+                <div class="card shadow rounded-4 mb-3" style="background-color: LightYellow; border-color: Orange;">
+                    <div class="card-body text-center">
+                        <div class="fw-bold" style="color: DarkOrange;">🤔 Sin resultados</div>
+                        <div class="text-muted">Intenta con otros términos de búsqueda o ajusta los filtros</div>
+                        <div class="text-muted small mt-2">💡 Tip: Usa palabras clave simples y verifica que los filtros apropiados estén seleccionados</div>
+                    </div>
+                </div>
+            }
+            @foreach (var libro in Libros)
+            {
+                    <CardLibro libro="libro" />
+            }
+        </div>
+    </div>
+</div>
+}
+@code {
+    // Resultados
+    List<Libro>? Libros { get; set; } = new();
+    bool IsBusy { get; set; } = false;
+
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(firstRender)
+        {
+            // Cargar datos iniciales si es necesario
+            await Buscar(new FilterLibroDTO(){ForTitulo=true});
+        }
+    }  
+    
+    async Task Buscar(FilterLibroDTO filterDTO)
+    {
+        IsBusy = true;
+        StateHasChanged();
+        
+        Libros = await _libroService.GetWithFilterAsync(filterDTO);
+        IsBusy = false;
+        StateHasChanged();
+    }
+
+
+
+    
+}
