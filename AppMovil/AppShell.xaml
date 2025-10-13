@@ -10,7 +10,7 @@
     Title="Biblioteca Digital">
 
     <Shell.BindingContext>
-        <viewModels:AppShellViewModel x:Name="AppShellVM"/>
+        <viewModels:AppShellViewModel/>
     </Shell.BindingContext>
 
     <!-- Header del Flyout personalizado -->
@@ -28,37 +28,34 @@
         Title="Login"
         ContentTemplate="{DataTemplate pages:LoginPage}"
         Route="LoginPage"
-        IsVisible="{Binding LoginVisible}"
         FlyoutItemIsVisible="False" />
     <ShellContent
         Title="Reseteo de Password"
         ContentTemplate="{DataTemplate pages:RecuperarPasswordPage}"
         Route="ResetPassword"
-        IsVisible="{Binding ResetPasswordVisible}"
         FlyoutItemIsVisible="False" />
     <ShellContent
         Title="Crear cuenta"
         ContentTemplate="{DataTemplate pages:RegistrarsePage}"
         Route="RegistrarsePage"
-        IsVisible="{Binding RegistrarseVisible}"
         FlyoutItemIsVisible="False" />
 
     <!-- Menu Principal - Solo visible cuando está logueado -->
-    <FlyoutItem Title="🏠 Inicio" Icon="home.png" IsVisible="{Binding MenuVisible}">
+    <FlyoutItem Title="🏠 Inicio" Icon="home.png" >
         <ShellContent
             Title="Dashboard"
             ContentTemplate="{DataTemplate pages:MainPage}"
             Route="MainPage" />
     </FlyoutItem>
 
-    <FlyoutItem Title="📖 Buscar Libros" Icon="search.png" IsVisible="{Binding MenuVisible}">
+    <FlyoutItem Title="📖 Buscar Libros" Icon="search.png">
         <ShellContent
             Title="Buscar Libros"
             ContentTemplate="{DataTemplate pages:BuscarLibrosPage}"
             Route="BuscarLibrosPage" />
     </FlyoutItem>
 
-    <FlyoutItem Title="📋 Mis Prestamos" Icon="book.png" IsVisible="{Binding MenuVisible}">
+    <FlyoutItem Title="📋 Mis Prestamos" Icon="book.png">
         <ShellContent
             Title="Prestamos"
             ContentTemplate="{DataTemplate pages:PrestamosPage}"
@@ -67,7 +64,7 @@
 
     <!-- Footer del Flyout con opción de logout -->
     <Shell.FlyoutFooter>
-        <StackLayout IsVisible="{Binding MenuVisible}" BackgroundColor="#F5F5F5" Padding="10">
+        <StackLayout BackgroundColor="#F5F5F5" Padding="10">
             <Button 
                 Text="🚪 Cerrar Sesion" 
                 BackgroundColor="#F44336" 

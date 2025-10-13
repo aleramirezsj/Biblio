@@ -38,7 +38,10 @@ namespace AppMovil.ViewModels
 
         private async Task OnVolver()
         {
-            await Shell.Current.GoToAsync("//LoginPage");
+            if (Application.Current?.MainPage is AppShell shell)
+            {
+                await shell.GoToAsync("//LoginPage");
+            }   
         }
 
         private async void Registrarse()
@@ -64,7 +67,10 @@ namespace AppMovil.ViewModels
                     var newUser = new Usuario { Nombre = Nombre, Email = Mail, TipoRol = TipoRolEnum.Alumno, Dni = "12345678", Password = Password };
                     await _usuarioService.AddAsync(newUser);
                     await Application.Current.MainPage.DisplayAlert("Registrarse", "Cuenta creada!", "Ok");
-                    await Shell.Current.GoToAsync("//LoginPage");
+                    if (Application.Current?.MainPage is AppShell shell)
+                    {
+                        await shell.GoToAsync("//LoginPage");
+                    }
                 }
             }
             catch (FirebaseAuthException error) // Use alias here 
