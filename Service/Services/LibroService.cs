@@ -1,4 +1,5 @@
-﻿using Service.DTOs;
+﻿using Microsoft.Extensions.Caching.Memory;
+using Service.DTOs;
 using Service.Interfaces;
 using Service.Models;
 using Service.Utils;
@@ -16,7 +17,7 @@ namespace Service.Services
 {
     public class LibroService : GenericService<Libro>, ILibroService
     {
-        public LibroService(HttpClient? httpClient = null) : base(httpClient)
+        public LibroService(HttpClient? httpClient = null, IMemoryCache? memoryCache = null) : base(httpClient, memoryCache)
         {
 
         }
