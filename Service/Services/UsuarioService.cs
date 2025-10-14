@@ -15,7 +15,7 @@ namespace Service.Services
 {
     public class UsuarioService : GenericService<Usuario>, IUsuarioService
     {
-        public UsuarioService(IHttpClientFactory? httpClientFactory = null) : base(httpClientFactory)
+        public UsuarioService(HttpClient? httpClient = null) : base(httpClient)
         {
 
         }

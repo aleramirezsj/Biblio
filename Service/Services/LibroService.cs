@@ -16,7 +16,7 @@ namespace Service.Services
 {
     public class LibroService : GenericService<Libro>, ILibroService
     {
-        public LibroService(IHttpClientFactory? httpClientFactory = null) : base(httpClientFactory)
+        public LibroService(HttpClient? httpClient = null) : base(httpClient)
         {
 
         }

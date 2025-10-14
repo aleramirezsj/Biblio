@@ -1,4 +1,5 @@
 ﻿using Firebase.Auth;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.JSInterop;
 using Service.Models.Login;
 using Service.Services;
@@ -8,14 +9,14 @@ namespace Web.Services
     public class FirebaseAuthService
     {
         private readonly IJSRuntime _jsRuntime;
-        private readonly ITokenProvider _tokenProvider;
         public event Action OnChangeLogin;
         public FirebaseUser CurrentUser { get; set; }
+        private IMemoryCache _memoryCache;
 
-        public FirebaseAuthService(IJSRuntime jsRuntime, ITokenProvider tokenProvider)
+        public FirebaseAuthService(IJSRuntime jsRuntime, IMemoryCache memoryCache)
         {
             _jsRuntime = jsRuntime;
-            _tokenProvider = tokenProvider;
+            _memoryCache = memoryCache;
         }
 
         public async Task<FirebaseUser?> SignInWithEmailPassword(string email, string password, bool rememberPassword)
@@ -44,7 +45,7 @@ namespace Web.Services
         {
             await _jsRuntime.InvokeVoidAsync("firebaseAuth.signOut");
             CurrentUser = null;
-            _tokenProvider.ClearToken();
+            _memoryCache.Remove("jwt");
             OnChangeLogin?.Invoke();
         }
 
@@ -62,13 +63,18 @@ namespace Web.Services
         private async Task SetUserToken()
         {
             var jwtToken = await _jsRuntime.InvokeAsync<string?>("firebaseAuth.getUserToken");
-            _tokenProvider.SetToken(jwtToken);
+            _memoryCache.Set("jwt", jwtToken);
         }
 
         public async Task<string?> GetUserToken()
         {
             // Usa el provider para resolver y cachear el token
-            return await _tokenProvider.GetTokenAsync();
+            return await _memoryCache.GetOrCreateAsync("jwt", async entry =>
+            {
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(55);
+                var token = await _jsRuntime.InvokeAsync<string?>("firebaseAuth.getUserToken");
+                return token;
+            });
         }
 
         public async Task<bool> IsUserAuthenticated()

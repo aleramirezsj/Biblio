@@ -15,7 +15,7 @@ namespace Service.Services
 {
     public class PrestamoService : GenericService<Prestamo>, IPrestamoService
     {
-        public PrestamoService(IHttpClientFactory? httpClientFactory = null) : base(httpClientFactory)
+        public PrestamoService(HttpClient? httpClient = null) : base(httpClient)
         {
 
         }
