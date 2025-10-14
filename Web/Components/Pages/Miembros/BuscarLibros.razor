@@ -51,6 +51,8 @@ else
         if(firstRender)
         {
             // Cargar datos iniciales si es necesario
+            IsBusy = true;
+            StateHasChanged();
             await Buscar(new FilterLibroDTO(){ForTitulo=true});
         }
     }  

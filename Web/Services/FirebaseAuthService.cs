@@ -8,12 +8,14 @@ namespace Web.Services
     public class FirebaseAuthService
     {
         private readonly IJSRuntime _jsRuntime;
+        private readonly ITokenProvider _tokenProvider;
         public event Action OnChangeLogin;
         public FirebaseUser CurrentUser { get; set; }
 
-        public FirebaseAuthService(IJSRuntime jsRuntime)
+        public FirebaseAuthService(IJSRuntime jsRuntime, ITokenProvider tokenProvider)
         {
             _jsRuntime = jsRuntime;
+            _tokenProvider = tokenProvider;
         }
 
         public async Task<FirebaseUser?> SignInWithEmailPassword(string email, string password, bool rememberPassword)
@@ -22,6 +24,7 @@ namespace Web.Services
             if (user != null)
             {
                 CurrentUser = user;
+                await SetUserToken();
                 OnChangeLogin?.Invoke();
             }
             return user;
@@ -41,6 +44,7 @@ namespace Web.Services
         {
             await _jsRuntime.InvokeVoidAsync("firebaseAuth.signOut");
             CurrentUser = null;
+            _tokenProvider.ClearToken();
             OnChangeLogin?.Invoke();
         }
 
@@ -55,13 +59,16 @@ namespace Web.Services
             else return null;
         }
 
-        public async Task SetUserToken()
+        private async Task SetUserToken()
         {
-            var jwt = await _jsRuntime.InvokeAsync<string?>("firebaseAuth.getUserToken");
-            if (jwt != null)
-            {
-                GenericService<object>.jwtToken = jwt;
-            }
+            var jwtToken = await _jsRuntime.InvokeAsync<string?>("firebaseAuth.getUserToken");
+            _tokenProvider.SetToken(jwtToken);
+        }
+
+        public async Task<string?> GetUserToken()
+        {
+            // Usa el provider para resolver y cachear el token
+            return await _tokenProvider.GetTokenAsync();
         }
 
         public async Task<bool> IsUserAuthenticated()
@@ -79,6 +86,7 @@ namespace Web.Services
         {
             var userFirebase = await _jsRuntime.InvokeAsync<FirebaseUser>("firebaseAuth.loginWithGoogle");
             CurrentUser = userFirebase;
+            await SetUserToken();
             OnChangeLogin?.Invoke();
             return userFirebase;
         }

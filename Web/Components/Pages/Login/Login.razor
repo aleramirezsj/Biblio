@@ -1,5 +1,6 @@
 ﻿@page "/login"
 
+
 @inject FirebaseAuthService _firebaseAuthService
 @inject SweetAlertService _sweetAlert
 @inject NavigationManager _navigationManager
@@ -78,6 +79,7 @@ else
     string email = string.Empty;
     string password = string.Empty;
     bool rememberPassword = false;
+    
 
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -103,6 +105,8 @@ else
                     return;
                 }
                 isAuthenticated = true;
+                await _firebaseAuthService.IsUserAuthenticated();
+
                 StateHasChanged();
                 // Aquí podrías redirigir al usuario a otra página si es necesario
             }
@@ -114,7 +118,7 @@ else
         }
         catch (Exception ex)
         {
-            await _sweetAlert.FireAsync("Error", ex.Message, SweetAlertIcon.Error);
+            await _sweetAlert.FireAsync("Error!!", ex.Message, SweetAlertIcon.Error);
         }
         
     }
@@ -139,6 +143,7 @@ else
         if (user != null)
         {
             isAuthenticated = true;
+            await _firebaseAuthService.IsUserAuthenticated();
             StateHasChanged();
             // Aquí podrías redirigir al usuario a otra página si es necesario
         }
