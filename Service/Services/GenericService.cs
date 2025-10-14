@@ -3,6 +3,7 @@ using Service.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
@@ -16,27 +17,45 @@ namespace Service.Services
         protected readonly HttpClient _httpClient;
         protected readonly string _endpoint;
         protected readonly JsonSerializerOptions _options;
+        private readonly IHttpClientFactory? _httpClientFactory;
         public static string? jwtToken = string.Empty;
 
-        public GenericService(HttpClient? httpClient=null)
+        public GenericService(IHttpClientFactory? httpClientFactory = null)
         {
-            _httpClient = httpClient??new HttpClient();
+            _httpClientFactory = httpClientFactory;
+            _httpClient = httpClientFactory?.CreateClient("BackendApi") ?? new HttpClient();
             _options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            //si el httpClient no es nulo ya tiena la baseAddress seteada
-            if (string.IsNullOrEmpty(_httpClient.BaseAddress?.ToString()))
+
+            if (_httpClient.BaseAddress is null)
             {
                 _httpClient.BaseAddress = new Uri(Properties.Resources.UrlApi);
+            }
+
+            if (_httpClientFactory is null)
+            {
                 SetAuthorizationHeader();
             }
+
             _endpoint = ApiEndpoints.GetEndpoint(typeof(T).Name);
         }
 
         protected void SetAuthorizationHeader()
         {
+            if (_httpClientFactory is not null)
+            {
+                // Cuando el servicio se resuelve por DI, el AuthenticationHandler
+                // agregado en el WebApp se encarga de adjuntar el JWT por request.
+                return;
+            }
+
             if (!string.IsNullOrEmpty(GenericService<object>.jwtToken))
+            {
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GenericService<object>.jwtToken);
+            }
             else
+            {
                 throw new ArgumentException("Error Token no definido", nameof(GenericService<object>.jwtToken));
+            }
         }
 
         public async Task<T?> AddAsync(T? entity)

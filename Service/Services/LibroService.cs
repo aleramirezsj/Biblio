@@ -5,6 +5,7 @@ using Service.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
@@ -15,7 +16,7 @@ namespace Service.Services
 {
     public class LibroService : GenericService<Libro>, ILibroService
     {
-        public LibroService(HttpClient? httpClient=null): base(httpClient)
+        public LibroService(IHttpClientFactory? httpClientFactory = null) : base(httpClientFactory)
         {
 
         }

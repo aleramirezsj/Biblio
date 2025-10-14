@@ -4,6 +4,7 @@ using Service.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
@@ -14,7 +15,7 @@ namespace Service.Services
 {
     public class PrestamoService : GenericService<Prestamo>, IPrestamoService
     {
-        public PrestamoService(HttpClient? httpClient=null): base(httpClient)
+        public PrestamoService(IHttpClientFactory? httpClientFactory = null) : base(httpClientFactory)
         {
 
         }
