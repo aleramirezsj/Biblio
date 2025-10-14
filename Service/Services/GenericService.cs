@@ -52,8 +52,16 @@ namespace Service.Services
             if (!string.IsNullOrWhiteSpace(GenericService<object>.jwtToken))
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GenericService<object>.jwtToken);
+                return;
             }
-            // Si no hay token, no lanzamos excepción aquí: el AuthenticationHandler podría adjuntarlo por solicitud
+            // Si no se definió el token, se lanza una excepción
+            
+                throw new InvalidOperationException("El token JWT no está disponible para la autorización.");
+            
+
+
+
+
         }
 
         public async Task<T?> AddAsync(T? entity)

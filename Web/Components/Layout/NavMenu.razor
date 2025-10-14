@@ -1,6 +1,7 @@
 ﻿@inject FirebaseAuthService _firebaseAuthService
 @inject NavigationManager _navigationManager
 @inject IUsuarioService _usuarioService
+@inject IMemoryCache _cacheMemory
 @rendermode InteractiveServer
 
 
@@ -25,6 +26,9 @@
             <NavLink class="nav-link" href="/miembros/buscar-libros">
                 <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Buscar libros
             </NavLink>
+                <NavLink class="nav-link" href="/miembros/prestamos">
+                    <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Prestamos libros
+                </NavLink>
             <!--muestro el nombre de quien esta logueado-->
                 <p class="text-white mt-2">Hola, @_usuarioLogueado?.Nombre</p>
         </div>
@@ -72,6 +76,10 @@
             if (!string.IsNullOrWhiteSpace(_userLogued?.Email))
             {
                 _usuarioLogueado = await _usuarioService.GetByEmailAsync(_userLogued.Email);
+                if (_usuarioLogueado != null)
+                {
+                    _cacheMemory.Set("usuarioLogueado", _usuarioLogueado);
+                }
             }
         }
         catch (Exception ex)
