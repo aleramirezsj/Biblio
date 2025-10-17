@@ -2,6 +2,8 @@
 @inject IPrestamoService _prestamoService
 @inject IMemoryCache _cacheMemory
 @inject SweetAlertService _sweetAlert
+@inject NavigationManager _navigationManager
+@rendermode InteractiveServer
 
 <div class="container py-4">
     <!-- Indicador de carga -->
@@ -96,6 +98,7 @@
         if(UsuarioLogueado == null)
         {
             await _sweetAlert.FireAsync("Error", "No se encontró el usuario logueado. Por favor, inicia sesión.", SweetAlertIcon.Error);
+            _navigationManager.NavigateTo("/login");
             return;
         }else
         {

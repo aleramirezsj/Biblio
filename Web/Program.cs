@@ -15,8 +15,8 @@ builder.Services.AddMemoryCache();
 // Auth service que usa el provider
 builder.Services.AddScoped<FirebaseAuthService>();
 
-builder.Services.AddScoped(typeof(IGenericService<object>),
-    typeof(GenericService<object>));
+builder.Services.AddScoped(typeof(IGenericService<>),
+    typeof(GenericService<>));
 //libroService
 builder.Services.AddScoped<ILibroService, LibroService>();
 //prestamoService
