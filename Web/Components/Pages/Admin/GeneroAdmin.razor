@@ -1,0 +1,120 @@
+﻿@page "/admin/generos"
+@inject NavigationManager _navigationManager
+@inject IGenericService<Genero> _generoService
+@inject SweetAlertService _sweetAlert
+@rendermode InteractiveServer
+<EncabezadoPage Titulo="Administración de Géneros" Descripcion="Gestiona los géneros de los libros en la plataforma" />
+<div class="container py-4">
+    @if (isLoading)
+    {
+        <div class="d-flex align-items-center justify-content-center my-4">
+            <div class="spinner-border text-primary" role="status"></div>
+            <span class="ms-2 text-primary">Cargando géneros...</span>
+        </div>
+    }
+    else
+    {
+        <button title="Nuevo" class="btn btn-info mb-2" @onclick="Nuevo" data-bs-toggle="modal" data-bs-target="#NuevoEditarModal">Nuevo</button>
+        @if (generos != null && generos.Count > 0)
+        {
+            <TablaIdNombreConFiltro ListEntity="@(generos.Cast<IEntityIdNombre>().ToList())" OnEliminar="Eliminar" OnModificar="Modificar"></TablaIdNombreConFiltro>
+            <NuevoEditarIdNombre Titulo="Género" Entity="@generoCurrent" OnGuardar="Guardar"></NuevoEditarIdNombre>
+        }
+        else
+        {
+            <div class="alert alert-info" role="alert">
+                No hay géneros registrados.
+            </div>
+        }
+    }
+
+</div>
+
+@code {
+    List<Genero>? generos = new();
+    Genero generoCurrent = new();
+
+    bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            generos = await _generoService.GetAllAsync();
+        }
+        catch (Exception)
+        {
+            // Manejar errores aquí (por ejemplo, mostrar un mensaje al usuario)
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+    private void Modificar(IEntityIdNombre entity)
+    {
+        generoCurrent = (Genero)entity;
+    }
+    private void Nuevo()
+    {
+        generoCurrent = new();
+    }
+    private async Task Eliminar(IEntityIdNombre entity)
+    {
+        SweetAlertResult respuesta = await _sweetAlert.FireAsync(new SweetAlertOptions
+        {
+            Title = "Eliminando género",
+            Text = $"¿Está seguro que desea borrar el género {entity.Nombre}",
+            Icon = SweetAlertIcon.Warning,
+            ShowCancelButton = true,
+            ConfirmButtonText = "Si, quiero borrarlo!",
+            CancelButtonText = "No, espera"
+        });
+        if (respuesta.IsConfirmed)
+        {
+            try
+            {
+                isLoading = true;
+                await _generoService.DeleteAsync(entity.Id);
+                generos = await _generoService.GetAllAsync();
+                await _sweetAlert.FireAsync("Eliminado", "El género ha sido eliminado exitosamente.", SweetAlertIcon.Success);
+            }
+            catch (Exception)
+            {
+                await _sweetAlert.FireAsync("Error", "Hubo un error al eliminar el género.", SweetAlertIcon.Error);
+            }
+            finally
+            {
+                isLoading = false;
+            }
+        }
+    }
+    private async Task Guardar(IEntityIdNombre entity)
+    {
+        try
+        {
+            isLoading = true;
+            Genero generoToSave = (Genero)entity;
+            if (generoToSave.Id == 0)
+            {
+                await _generoService.AddAsync(generoToSave);
+                await _sweetAlert.FireAsync("Creado", "El género ha sido creado exitosamente.", SweetAlertIcon.Success);
+            }
+            else
+            {
+                await _generoService.UpdateAsync(generoToSave);
+                await _sweetAlert.FireAsync("Actualizado", "El género ha sido actualizado exitosamente.", SweetAlertIcon.Success);
+            }
+            generos = await _generoService.GetAllAsync();
+        }
+        catch (Exception)
+        {
+            await _sweetAlert.FireAsync("Error", "Hubo un error al guardar el género.", SweetAlertIcon.Error);
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+}

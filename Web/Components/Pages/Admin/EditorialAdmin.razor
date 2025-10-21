@@ -1,0 +1,120 @@
+﻿@page "/admin/editoriales"
+@inject NavigationManager _navigationManager
+@inject IGenericService<Editorial> _editorialService
+@inject SweetAlertService _sweetAlert
+@rendermode InteractiveServer
+<EncabezadoPage Titulo="Administración de Editoriales" Descripcion="Gestiona las editoriales de los libros en la plataforma" />
+<div class="container py-4">
+    @if (isLoading)
+    {
+        <div class="d-flex align-items-center justify-content-center my-4">
+            <div class="spinner-border text-primary" role="status"></div>
+            <span class="ms-2 text-primary">Cargando editoriales...</span>
+        </div>
+    }
+    else
+    {
+        <button title="Nuevo" class="btn btn-info mb-2" @onclick="Nuevo" data-bs-toggle="modal" data-bs-target="#NuevoEditarModal">Nuevo</button>
+        @if (editoriales != null && editoriales.Count > 0)
+        {
+            <TablaIdNombreConFiltro ListEntity="@(editoriales.Cast<IEntityIdNombre>().ToList())" OnEliminar="Eliminar" OnModificar="Modificar"></TablaIdNombreConFiltro>
+            <NuevoEditarIdNombre Titulo="Editorial" Entity="@editorialCurrent" OnGuardar="Guardar"></NuevoEditarIdNombre>
+        }
+        else
+        {
+            <div class="alert alert-info" role="alert">
+                No hay editoriales registradas.
+            </div>
+        }
+    }
+
+</div>
+
+@code {
+    List<Editorial>? editoriales = new();
+    Editorial editorialCurrent = new();
+
+    bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            editoriales = await _editorialService.GetAllAsync();
+        }
+        catch (Exception)
+        {
+            // Manejar errores aquí (por ejemplo, mostrar un mensaje al usuario)
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+    private void Modificar(IEntityIdNombre entity)
+    {
+        editorialCurrent = (Editorial)entity;
+    }
+    private void Nuevo()
+    {
+        editorialCurrent = new();
+    }
+    private async Task Eliminar(IEntityIdNombre entity)
+    {
+        SweetAlertResult respuesta = await _sweetAlert.FireAsync(new SweetAlertOptions
+        {
+            Title = "Eliminando editorial",
+            Text = $"¿Está seguro que desea borrar la editorial {entity.Nombre}",
+            Icon = SweetAlertIcon.Warning,
+            ShowCancelButton = true,
+            ConfirmButtonText = "Si, quiero borrarlo!",
+            CancelButtonText = "No, espera"
+        });
+        if (respuesta.IsConfirmed)
+        {
+            try
+            {
+                isLoading = true;
+                await _editorialService.DeleteAsync(entity.Id);
+                editoriales = await _editorialService.GetAllAsync();
+                await _sweetAlert.FireAsync("Eliminado", "La editorial ha sido eliminada exitosamente.", SweetAlertIcon.Success);
+            }
+            catch (Exception)
+            {
+                await _sweetAlert.FireAsync("Error", "Hubo un error al eliminar la editorial.", SweetAlertIcon.Error);
+            }
+            finally
+            {
+                isLoading = false;
+            }
+        }
+    }
+    private async Task Guardar(IEntityIdNombre entity)
+    {
+        try
+        {
+            isLoading = true;
+            Editorial editorialToSave = (Editorial)entity;
+            if (editorialToSave.Id == 0)
+            {
+                await _editorialService.AddAsync(editorialToSave);
+                await _sweetAlert.FireAsync("Creada", "La editorial ha sido creada exitosamente.", SweetAlertIcon.Success);
+            }
+            else
+            {
+                await _editorialService.UpdateAsync(editorialToSave);
+                await _sweetAlert.FireAsync("Actualizada", "La editorial ha sido actualizada exitosamente.", SweetAlertIcon.Success);
+            }
+            editoriales = await _editorialService.GetAllAsync();
+        }
+        catch (Exception)
+        {
+            await _sweetAlert.FireAsync("Error", "Hubo un error al guardar la editorial.", SweetAlertIcon.Error);
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+}

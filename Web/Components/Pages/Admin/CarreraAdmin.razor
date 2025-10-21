@@ -1,0 +1,122 @@
+﻿@page "/admin/carreras"
+@inject NavigationManager _navigationManager
+@inject IGenericService<Carrera> _carreraService
+@inject SweetAlertService _sweetAlert
+@rendermode InteractiveServer
+<EncabezadoPage Titulo="Administración de Carreras" Descripcion="Gestiona las carreras de la plataforma" />
+<div class="container py-4">
+    @if (isLoading)
+    {
+        <div class="d-flex align-items-center justify-content-center my-4">
+            <div class="spinner-border text-primary" role="status"></div>
+            <span class="ms-2 text-primary">Cargando carreras...</span>
+        </div>
+    }
+    else
+    {
+        <button title="Nuevo" class="btn btn-info mb-2" @onclick="Nuevo" data-bs-toggle="modal" data-bs-target="#NuevoEditarModal">Nuevo</button>
+        @if (carreras != null && carreras.Count > 0)
+        {
+            <TablaIdNombreConFiltro ListEntity="@(carreras.Cast<IEntityIdNombre>().ToList())" OnEliminar="Eliminar" OnModificar="Modificar"></TablaIdNombreConFiltro>
+            <NuevoEditarIdNombre Titulo="Carrera" Entity="@carreraCurrent" OnGuardar="Guardar"></NuevoEditarIdNombre>
+        }
+        else
+        {
+            <div class="alert alert-info" role="alert">
+                No hay carreras registradas.
+            </div>
+        }
+    }
+
+</div>
+
+@code {
+    List<Carrera>? carreras = new List<Carrera>();
+    Carrera carreraCurrent = new Carrera();
+
+    bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            carreras = await _carreraService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            // Manejar errores aquí (por ejemplo, mostrar un mensaje al usuario)
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+    private void Modificar(IEntityIdNombre entity)
+    {
+        carreraCurrent = (Carrera)entity;
+    }
+    private async Task Eliminar(IEntityIdNombre entity)
+    {
+        SweetAlertResult respuesta = await _sweetAlert.FireAsync(new SweetAlertOptions
+        {
+            Title = "Eliminando carrera",
+            Text = $"¿Está seguro que desea borrar la carrera {entity.Nombre}",
+            Icon = SweetAlertIcon.Warning,
+            ShowCancelButton = true,
+            ConfirmButtonText = "Si, quiero borrarlo!",
+            CancelButtonText = "No, espera"
+        });
+        if (respuesta.IsConfirmed)
+        {
+            try
+            {
+                isLoading = true;
+                await _carreraService.DeleteAsync(entity.Id);
+                carreras = await _carreraService.GetAllAsync();
+                await _sweetAlert.FireAsync("Eliminado", "La carrera ha sido eliminado exitosamente.", SweetAlertIcon.Success);
+            }
+            catch (Exception ex)
+            {
+                await _sweetAlert.FireAsync("Error", "Hubo un error al eliminar la carrera.", SweetAlertIcon.Error);
+            }
+            finally
+            {
+                isLoading = false;
+            }
+        }
+    }
+    private void Nuevo()
+    {
+        carreraCurrent = new();
+    }
+    private async Task Guardar(IEntityIdNombre entity)
+    {
+        try
+        {
+            isLoading = true;
+            Carrera carreraToSave = (Carrera)entity;
+            if (carreraToSave.Id == 0)
+            {
+                // Nuevo autor
+                await _carreraService.AddAsync(carreraToSave);
+                await _sweetAlert.FireAsync("Creada", "La carrera ha sido creada exitosamente.", SweetAlertIcon.Success);
+            }
+            else
+            {
+                // Actualizar autor existente
+                await _carreraService.UpdateAsync(carreraToSave);
+                await _sweetAlert.FireAsync("Actualizada", "La carrera ha sido actualizada exitosamente.", SweetAlertIcon.Success);
+            }
+            carreras = await _carreraService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            await _sweetAlert.FireAsync("Error", "Hubo un error al guardar la carrera.", SweetAlertIcon.Error);
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+}
