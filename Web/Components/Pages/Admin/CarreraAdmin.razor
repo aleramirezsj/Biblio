@@ -5,26 +5,33 @@
 @rendermode InteractiveServer
 <EncabezadoPage Titulo="Administración de Carreras" Descripcion="Gestiona las carreras de la plataforma" />
 <div class="container py-4">
+
+    <SeccionBtnNuevoMostrarEliminados @bind-MostrarEliminados="MostrarEliminados" OnAfterMostrarEliminados="GetCarreras" OnNuevo="Nuevo" />
     @if (isLoading)
     {
-        <div class="d-flex align-items-center justify-content-center my-4">
-            <div class="spinner-border text-primary" role="status"></div>
-            <span class="ms-2 text-primary">Cargando carreras...</span>
-        </div>
+        <ActivityIndicator Mensaje="Cargando carreras..." />
     }
     else
     {
-        <button title="Nuevo" class="btn btn-info mb-2" @onclick="Nuevo" data-bs-toggle="modal" data-bs-target="#NuevoEditarModal">Nuevo</button>
         @if (carreras != null && carreras.Count > 0)
         {
-            <TablaIdNombreConFiltro ListEntity="@(carreras.Cast<IEntityIdNombre>().ToList())" OnEliminar="Eliminar" OnModificar="Modificar"></TablaIdNombreConFiltro>
+            <TablaIdNombreConFiltro ListEntity="@(carreras.Cast<IEntityIdNombre>().ToList())" OnEliminar="Eliminar" OnModificar="Modificar" MostrarEliminados="MostrarEliminados" OnRestaurar="Restaurar"></TablaIdNombreConFiltro>
             <NuevoEditarIdNombre Titulo="Carrera" Entity="@carreraCurrent" OnGuardar="Guardar"></NuevoEditarIdNombre>
         }
         else
         {
-            <div class="alert alert-info" role="alert">
-                No hay carreras registradas.
-            </div>
+            @if (MostrarEliminados)
+            {
+                <div class="alert alert-info" role="alert">
+                    No hay carreras eliminadas.
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info" role="alert">
+                    No hay carreras registradas.
+                </div>
+            }
         }
     }
 
@@ -33,23 +40,13 @@
 @code {
     List<Carrera>? carreras = new List<Carrera>();
     Carrera carreraCurrent = new Carrera();
+    public bool MostrarEliminados { get; set; } = false;
 
     bool isLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
-        try
-        {
-            carreras = await _carreraService.GetAllAsync();
-        }
-        catch (Exception ex)
-        {
-            // Manejar errores aquí (por ejemplo, mostrar un mensaje al usuario)
-        }
-        finally
-        {
-            isLoading = false;
-        }
+        await GetCarreras();
     }
     private void Modificar(IEntityIdNombre entity)
     {
@@ -119,4 +116,56 @@
             StateHasChanged();
         }
     }
+    private async Task GetCarreras()
+    {
+        isLoading = true;
+        try
+        {
+            if (MostrarEliminados)
+                carreras = await _carreraService.GetAllDeletedsAsync();
+            else
+                carreras = await _carreraService.GetAllAsync();
+        }
+        catch (Exception)
+        {
+            // Manejar errores aquí (por ejemplo, mostrar un mensaje al usuario)
+        }
+        finally
+        {
+            isLoading = false;
+            //StateHasChanged();
+        }
+    }
+    private async Task Restaurar(IEntityIdNombre entity)
+    {
+        SweetAlertResult respuesta = await _sweetAlert.FireAsync(new SweetAlertOptions
+        {
+            Title = "Restaurando carrera",
+            Text = $"¿Está seguro que desea restaurar la carrera {entity.Nombre}?",
+            Icon = SweetAlertIcon.Question,
+            ShowCancelButton = true,
+            ConfirmButtonText = "Si, quiero restaurarla!",
+            CancelButtonText = "No, espera"
+        });
+        if (respuesta.IsConfirmed)
+        {
+            try
+            {
+                isLoading = true;
+                await _carreraService.RestoreAsync(entity.Id);
+                carreras = await _carreraService.GetAllDeletedsAsync();
+                await _sweetAlert.FireAsync("Restaurada", "La carrera ha sido restaurada exitosamente.", SweetAlertIcon.Success);
+            }
+            catch (Exception ex)
+            {
+                await _sweetAlert.FireAsync("Error", "Hubo un error al restaurar la carrera.", SweetAlertIcon.Error);
+            }
+            finally
+            {
+                isLoading = false;
+
+            }
+        }
+    }
+
 }

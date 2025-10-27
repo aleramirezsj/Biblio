@@ -5,26 +5,32 @@
 @rendermode InteractiveServer
 <EncabezadoPage Titulo="Administración de Editoriales" Descripcion="Gestiona las editoriales de los libros en la plataforma" />
 <div class="container py-4">
+    <SeccionBtnNuevoMostrarEliminados @bind-MostrarEliminados="MostrarEliminados" OnAfterMostrarEliminados="GetEditoriales" OnNuevo="Nuevo" />
     @if (isLoading)
     {
-        <div class="d-flex align-items-center justify-content-center my-4">
-            <div class="spinner-border text-primary" role="status"></div>
-            <span class="ms-2 text-primary">Cargando editoriales...</span>
-        </div>
+        <ActivityIndicator Mensaje="Cargando editoriales..." />
     }
     else
     {
-        <button title="Nuevo" class="btn btn-info mb-2" @onclick="Nuevo" data-bs-toggle="modal" data-bs-target="#NuevoEditarModal">Nuevo</button>
         @if (editoriales != null && editoriales.Count > 0)
         {
-            <TablaIdNombreConFiltro ListEntity="@(editoriales.Cast<IEntityIdNombre>().ToList())" OnEliminar="Eliminar" OnModificar="Modificar"></TablaIdNombreConFiltro>
+            <TablaIdNombreConFiltro ListEntity="@(editoriales.Cast<IEntityIdNombre>().ToList())" OnEliminar="Eliminar" OnModificar="Modificar" MostrarEliminados="MostrarEliminados" OnRestaurar="Restaurar"></TablaIdNombreConFiltro>
             <NuevoEditarIdNombre Titulo="Editorial" Entity="@editorialCurrent" OnGuardar="Guardar"></NuevoEditarIdNombre>
         }
         else
         {
-            <div class="alert alert-info" role="alert">
-                No hay editoriales registradas.
-            </div>
+            @if (MostrarEliminados)
+            {
+                <div class="alert alert-info" role="alert">
+                    No hay editoriales eliminadas.
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info" role="alert">
+                    No hay editoriales registradas.
+                </div>
+            }
         }
     }
 
@@ -33,23 +39,13 @@
 @code {
     List<Editorial>? editoriales = new();
     Editorial editorialCurrent = new();
+    public bool MostrarEliminados { get; set; } = false;
 
     bool isLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
-        try
-        {
-            editoriales = await _editorialService.GetAllAsync();
-        }
-        catch (Exception)
-        {
-            // Manejar errores aquí (por ejemplo, mostrar un mensaje al usuario)
-        }
-        finally
-        {
-            isLoading = false;
-        }
+        await GetEditoriales();
     }
     private void Modificar(IEntityIdNombre entity)
     {
@@ -115,6 +111,57 @@
         {
             isLoading = false;
             StateHasChanged();
+        }
+    }
+    private async Task GetEditoriales()
+    {
+        isLoading = true;
+        try
+        {
+            if (MostrarEliminados)
+                editoriales = await _editorialService.GetAllDeletedsAsync();
+            else
+                editoriales = await _editorialService.GetAllAsync();
+        }
+        catch (Exception)
+        {
+            // Manejar errores aquí (por ejemplo, mostrar un mensaje al usuario)
+        }
+        finally
+        {
+            isLoading = false;
+            //StateHasChanged();
+        }
+    }
+
+    private async Task Restaurar(IEntityIdNombre entity)
+    {
+        SweetAlertResult respuesta = await _sweetAlert.FireAsync(new SweetAlertOptions
+        {
+            Title = "Restaurando editorial",
+            Text = $"¿Está seguro que desea restaurar la editorial {entity.Nombre}?",
+            Icon = SweetAlertIcon.Question,
+            ShowCancelButton = true,
+            ConfirmButtonText = "Si, quiero restaurarla!",
+            CancelButtonText = "No, espera"
+        });
+        if (respuesta.IsConfirmed)
+        {
+            try
+            {
+                isLoading = true;
+                await _editorialService.RestoreAsync(entity.Id);
+                editoriales = await _editorialService.GetAllDeletedsAsync();
+                await _sweetAlert.FireAsync("Restaurada", "La editorial ha sido restaurada exitosamente.", SweetAlertIcon.Success);
+            }
+            catch (Exception)
+            {
+                await _sweetAlert.FireAsync("Error", "Hubo un error al restaurar la editorial.", SweetAlertIcon.Error);
+            }
+            finally
+            {
+                isLoading = false;
+            }
         }
     }
 }

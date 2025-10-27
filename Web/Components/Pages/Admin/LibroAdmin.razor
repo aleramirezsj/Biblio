@@ -14,7 +14,7 @@
     }
     else
     {
-        <button title="Nuevo" class="btn btn-info mb-2" @onclick="Nuevo" data-bs-toggle="modal" data-bs-target="#NuevoEditarLibro">Nuevo</button>
+        <NavLink class="btn btn-primary" href="/libros/crear">Nuevo libro</NavLink>
         @if (libros != null && libros.Count > 0)
         {
             <TablaLibrosConFiltro ListEntity="@(libros.ToList())" OnEliminar="Eliminar" OnModificar="Modificar"></TablaLibrosConFiltro>
@@ -53,7 +53,7 @@
     }
     private void Modificar(Libro entity)
     {
-        libroCurrent = entity;       
+        _navigationManager.NavigateTo($"/libros/editar/{entity.Id}");
     }
     private void Nuevo()
     {

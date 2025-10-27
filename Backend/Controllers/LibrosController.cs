@@ -70,7 +70,12 @@ namespace Backend.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Libro>> GetLibro(int id)
         {
-            var libro = await _context.Libros.AsNoTracking().FirstOrDefaultAsync(l=>l.Id.Equals(id));
+            var libro = await _context.Libros
+                .Include(l => l.Editorial)
+                .Include(l => l.LibrosAutores).ThenInclude(la => la.Autor)
+                .Include(l => l.LibrosGeneros).ThenInclude(lg => lg.Genero)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(l=>l.Id.Equals(id));
 
             if (libro == null)
             {

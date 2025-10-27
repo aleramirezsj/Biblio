@@ -1,0 +1,163 @@
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Forms
+
+<div class="image-upload-container">
+    <label class="form-label">@Label @(IsRequired ? "<span class=\"text-danger\">*</span>" : "")</label>
+    
+    <div class="upload-area">
+        <InputFile OnChange="@HandleFileSelected" 
+                   accept="image/*" 
+                   class="form-control"
+                   id="@InputId" />
+        <small class="text-muted d-block mt-2">
+            Formatos soportados: JPG, PNG, GIF, WebP (máx. @(MaxFileSizeMB)MB)
+        </small>
+    </div>
+
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+        <div class="alert alert-danger mt-2" role="alert">
+            @ErrorMessage
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(ImageData))
+    {
+        <div class="mt-3">
+            <h6>Vista Previa:</h6>
+            <div class="position-relative d-inline-block">
+                <img src="@ImageData" 
+                     alt="Vista previa" 
+                     style="max-width: 300px; max-height: 400px;" 
+                     class="img-thumbnail" />
+                <button type="button" 
+                        class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2"
+                        @onclick="@ClearImage"
+                        title="Eliminar imagen">
+                    <span class="bi bi-trash"></span> Eliminar
+                </button>
+            </div>
+            @if (!string.IsNullOrEmpty(FileName))
+            {
+                <p class="mt-2 text-muted">
+                    <small>Archivo: @FileName</small>
+                </p>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string Label { get; set; } = "Cargar Imagen";
+
+    [Parameter]
+    public string InputId { get; set; } = $"image-upload-{Guid.NewGuid()}";
+
+    [Parameter]
+    public string ImageData { get; set; } = string.Empty;
+
+    [Parameter]
+    public EventCallback<string> ImageDataChanged { get; set; }
+
+    [Parameter]
+    public bool IsRequired { get; set; } = false;
+
+    [Parameter]
+    public long MaxFileSizeMB { get; set; } = 5;
+
+    [Parameter]
+    public string[] AllowedExtensions { get; set; } = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+
+    private string ErrorMessage = string.Empty;
+    private string FileName = string.Empty;
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        ErrorMessage = string.Empty;
+        FileName = string.Empty;
+
+        try
+        {
+            var file = e.File;
+            var maxFileSize = MaxFileSizeMB * 1024 * 1024;
+
+            // Validar tamaño
+            if (file.Size > maxFileSize)
+            {
+                ErrorMessage = $"El archivo es demasiado grande. Máximo permitido: {MaxFileSizeMB}MB";
+                return;
+            }
+
+            // Validar extensión
+            var extension = System.IO.Path.GetExtension(file.Name).ToLower();
+            if (!AllowedExtensions.Contains(extension))
+            {
+                ErrorMessage = $"Formato no permitido. Formatos válidos: {string.Join(", ", AllowedExtensions)}";
+                return;
+            }
+
+            // Validar tipo MIME
+            var allowedMimeTypes = new[] { "image/jpeg", "image/png", "image/gif", "image/webp" };
+            if (!allowedMimeTypes.Contains(file.ContentType.ToLower()))
+            {
+                ErrorMessage = $"Tipo de archivo no válido. Debe ser una imagen.";
+                return;
+            }
+
+            // Leer el archivo y convertir a base64
+            using (var stream = file.OpenReadStream(maxFileSize))
+            {
+                var buffer = new byte[file.Size];
+                await stream.ReadAsync(buffer);
+                
+                ImageData = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer)}";
+                FileName = file.Name;
+                
+                await ImageDataChanged.InvokeAsync(ImageData);
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error al cargar la imagen: {ex.Message}";
+        }
+    }
+
+    private async Task ClearImage()
+    {
+        ImageData = string.Empty;
+        FileName = string.Empty;
+        ErrorMessage = string.Empty;
+        await ImageDataChanged.InvokeAsync(string.Empty);
+    }
+}
+
+<style>
+    .image-upload-container {
+        margin-bottom: 1rem;
+    }
+
+    .upload-area {
+        padding: 1rem;
+        border: 2px dashed #dee2e6;
+        border-radius: 0.375rem;
+        background-color: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+
+    .upload-area:hover {
+        border-color: #0d6efd;
+        background-color: #e7f1ff;
+    }
+
+    .upload-area input[type="file"] {
+        cursor: pointer;
+    }
+
+    .img-thumbnail {
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        padding: 0.25rem;
+    }
+</style>
+
