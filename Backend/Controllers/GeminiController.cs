@@ -96,7 +96,7 @@ namespace Backend.Controllers
             if (string.IsNullOrWhiteSpace(apiKey))
                 return StatusCode(500, "Falta configurar Gemini:ApiKey.");
 
-            
+            var base64 = Convert.ToBase64String(bytes);
 
             // Prompt en español + salida JSON estricta (response_schema)
             var prompt = """
@@ -118,8 +118,8 @@ Eres un asistente experto en catalogación bibliográfica. Analiza EXCLUSIVAMENT
                             new { text = prompt },
                             new {
                                 inline_data = new {
-                                    mime_type = req.Image.ContentType ?? "image/jpeg",
-                                    //data = base64
+                                    mime_type = mime,
+                                    data = base64
                                 }
                             }
                         }

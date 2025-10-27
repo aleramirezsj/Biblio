@@ -23,6 +23,7 @@ builder.Services.AddScoped<ILibroService, LibroService>();
 builder.Services.AddScoped<IPrestamoService, PrestamoService>();
 //usuarioService
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+builder.Services.AddHttpClient();
 
 builder.Services.AddSweetAlert2();
 
