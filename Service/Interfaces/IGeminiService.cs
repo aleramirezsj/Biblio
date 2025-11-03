@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Service.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,5 +10,6 @@ namespace Service.Interfaces
     public interface IGeminiService
     {
         Task<string?> GetPrompt(string textPrompt);
+        Task<Libro> GetLibroFromPortada(string imageUrl);
     }
 }

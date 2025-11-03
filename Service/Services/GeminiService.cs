@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Service.Interfaces;
+using Service.Models;
 using Service.Utils;
 using System;
 using System.Collections.Generic;
@@ -7,6 +8,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Service.Services
@@ -15,11 +17,13 @@ namespace Service.Services
     {
         private readonly IConfiguration _configuration;
         private readonly HttpClient _httpClient = new HttpClient();
+        protected readonly JsonSerializerOptions _options;
         public static string? jwtToken = string.Empty;
 
         public GeminiService(IConfiguration configuration)
         {
             _configuration = configuration;
+            _options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             if (!string.IsNullOrEmpty(GenericService<object>.jwtToken))
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GenericService<object>.jwtToken);
             else
@@ -56,6 +60,43 @@ namespace Service.Services
 
 
 
+        }
+
+        public async Task<Libro> GetLibroFromPortada(string imageUrl)
+        {
+            if (string.IsNullOrEmpty(imageUrl))
+            {
+                throw new ArgumentException("La url de la imagen no puede estar vacía.", nameof(imageUrl));
+            }
+            try
+            {
+                var urlApi = _configuration["UrlApi"];
+                var endpointGemini = ApiEndpoints.GetEndpoint("Gemini");
+
+                var response = await _httpClient.GetAsync($"{urlApi}{endpointGemini}/ocr-portada?imageUrl={imageUrl}");
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadAsStringAsync();
+                    var libro = JsonSerializer.Deserialize<Libro>(result,_options);
+                    if (libro != null)
+                    {
+                        return libro;
+                    }
+                    else
+                    {
+                        throw new Exception("Error al deserializar el libro desde la respuesta de la API.");
+                    }
+
+                }
+                else
+                {
+                    throw new Exception($"Error en la respuesta de la API: {response.StatusCode} - {response.ReasonPhrase}");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al obtener el prompt de Gemini: " + ex.Message);
+            }
         }
     }
 }

@@ -19,6 +19,9 @@ namespace Service.Models
         [Required]
         [Column(TypeName = "text")]
         public string Sinopsis { get; set; } = string.Empty;
+        public string CDU { get; set; } = string.Empty;
+        public string Libristica { get; set; } = string.Empty;
+        public string PalabrasClave { get; set; } = string.Empty;
         public bool IsDeleted { get; set; } = false;
         [NotMapped]
         virtual public string Autores

@@ -1,15 +1,8 @@
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Service.DTOs;
 using Service.Services;
 using System.Text;
 using System.Text.Json;
-using System.Net.Http.Headers;
-using System.Net.Http;
-using System.Net;
-using System.IO;
-using Xunit;
 
 namespace BiblioTestProject
 {
@@ -101,40 +94,19 @@ namespace BiblioTestProject
         {
             // Autenticación (si tu API requiere token, obténlo aquí)
             await LoginTest();
+            //leemos la api key desde appsettings.json
+            var configuration = new ConfigurationBuilder()
+                  .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                  .AddEnvironmentVariables()
+                  .Build();
+            var urlImage = "https://images.cdn2.buscalibre.com/fit-in/360x360/e6/5f/e65f54742ad7bbc41903d17f75b77d78.jpg";
+            var servicio = new GeminiService(configuration);
+            var libro = await servicio.GetLibroFromPortada(urlImage);
+            Console.WriteLine($"Respuesta de IA desde servicio: {libro.Titulo}");
+            Assert.NotNull(libro);
 
-            // Ruta de la imagen de prueba (debe existir en la carpeta del proyecto)
-            var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "portada_test.jpg");
-            Assert.True(File.Exists(imagePath), $"No se encontró la imagen de prueba: {imagePath}");
 
-            using var client = new HttpClient();
-            //client.BaseAddress = new Uri("https://localhost:7000/"); // Cambia el puerto si tu backend usa otro
 
-            // Si necesitas token:
-            // client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-            using var form = new MultipartFormDataContent();
-            using var imageStream = File.OpenRead(imagePath);
-            var imageContent = new StreamContent(imageStream);
-            imageContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
-            form.Add(imageContent, "Image", "portada_test.jpg");
-
-            // Puedes agregar otros campos si BookCoverExtractionRequestDTO los requiere
-            if (!string.IsNullOrEmpty(GenericService<object>.jwtToken))
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GenericService<object>.jwtToken);
-            else
-                throw new ArgumentException("Error Token no definido", nameof(GenericService<object>.jwtToken));
-
-            var response = await client.PostAsync("https://localhost:7000/api/gemini/ocr-portada", form);
-            var result = await response.Content.ReadAsStringAsync();
-
-            Assert.True(response.IsSuccessStatusCode, $"Error en la API: {result}");
-
-            // Deserializa el resultado
-            var metadata = JsonSerializer.Deserialize<BookMetadataDTO>(result, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            Assert.NotNull(metadata);
-            Assert.False(string.IsNullOrWhiteSpace(metadata.Titulo));
-            Assert.NotNull(metadata.Autores);
-            Assert.NotNull(metadata.Editorial);
         }
     }
 }
