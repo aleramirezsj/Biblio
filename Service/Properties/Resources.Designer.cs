@@ -68,5 +68,14 @@ namespace Service.Properties {
                 return ResourceManager.GetString("UrlApi", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Busca una cadena traducida similar a https://api.isp20.edu.ar/api/.
+        /// </summary>
+        public static string UrlApiInstitutoApp {
+            get {
+                return ResourceManager.GetString("UrlApiInstitutoApp", resourceCulture);
+            }
+        }
     }
 }

@@ -120,4 +120,7 @@
   <data name="UrlApi" xml:space="preserve">
     <value>https://localhost:7000/api/</value>
   </data>
+  <data name="UrlApiInstitutoApp" xml:space="preserve">
+    <value>https://api.isp20.edu.ar/api/</value>
+  </data>
 </root>

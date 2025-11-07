@@ -15,17 +15,16 @@ namespace Service.Services
 {
     public class InstitutoAppService : IInstitutoAppService
     {
-        private readonly IConfiguration _configuration;
         private readonly HttpClient _httpClient = new HttpClient();
         protected readonly JsonSerializerOptions _options;
 
 
-        public InstitutoAppService(IConfiguration configuration)
+        public InstitutoAppService()
         {
-            _configuration = configuration;
             _options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 
         }
+
         public async Task<Usuario?> GetUsuarioByEmailAsync(string email)
         {
             if (string.IsNullOrEmpty(email))
@@ -34,7 +33,7 @@ namespace Service.Services
             }
             try
             {
-                var urlApi = _configuration["UrlInstitutoApp"];
+                var urlApi = Properties.Resources.UrlApiInstitutoApp;
                 var endpoint = ApiEndpoints.GetEndpoint("UsuarioInstitutoApp");
                 
                 var response = await _httpClient.GetAsync($"{urlApi}{endpoint}/getbyemail?email={email}");

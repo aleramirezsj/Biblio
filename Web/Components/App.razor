@@ -73,14 +73,14 @@
                     //Enviar correo de verificación
                     user.sendEmailVerification();
 
-                    return userCredential.user.uid;
+                    return { Error: "", UserUid: userCredential.user.uid};
 
 
 
                 } catch (error) {
                     console.error("Error en autenticación:", error.message);
-                    return null;
-                }
+                    return {Error: error.message, UserUid:""};
+                    }
 
             },
 

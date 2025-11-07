@@ -87,7 +87,7 @@ namespace Service.Services
             return response.IsSuccessStatusCode;
         }
 
-        public async Task<List<T>?> GetAllAsync(string? filtro = "")
+        public virtual async Task<List<T>?> GetAllAsync(string? filtro = "")
         {
             SetAuthorizationHeader();
             var response = await _httpClient.GetAsync($"{_endpoint}?filtro={filtro}");

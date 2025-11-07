@@ -27,6 +27,7 @@ namespace BiblioTestProject
             // Assert
             Assert.NotNull(usuario);
             Assert.Equal(email, usuario.Email);
+            Console.WriteLine($"Usuario encontrado: {usuario.ToString()}");
         }
 
 

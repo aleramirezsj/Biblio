@@ -8,7 +8,6 @@ namespace Backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class CarrerasController : ControllerBase
     {
         private readonly BiblioContext _context;

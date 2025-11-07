@@ -27,5 +27,7 @@ namespace Service.Models
         public string Observacion { get; set; } = string.Empty;
         public bool IsDeleted { get; set; } = false;
 
+        public ICollection<UsuarioCarrera> CarrerasInscriptas { get; set; } = new List<UsuarioCarrera>();
+
     }
 }
