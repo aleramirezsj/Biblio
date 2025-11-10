@@ -68,7 +68,7 @@ namespace Backend.Controllers
             }
             catch (FirebaseAuthException ex)
             {
-                return BadRequest(new { message = ex.Reason.ToString() });
+                throw new Exception(ex.Reason.ToString() );
             }
         }
 

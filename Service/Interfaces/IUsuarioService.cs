@@ -10,5 +10,6 @@ namespace Service.Interfaces
     public interface IUsuarioService: IGenericService<Usuario> 
     {
         public Task<Usuario?> GetByEmailAsync(string email);
+        public Task<bool> LoginInSystem(string email, string password);
     }
 }

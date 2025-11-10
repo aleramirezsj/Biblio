@@ -2,13 +2,14 @@ using Backend.DataContext;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Service.DTOs;
+using Service.ExtentionMethods;
 using Service.Models;
 
 namespace Backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class UsuariosController : ControllerBase
     {
         private readonly BiblioContext _context;
@@ -20,6 +21,7 @@ namespace Backend.Controllers
 
         // GET: api/Usuarios
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<Usuario>>> GetUsuarios([FromQuery] string filtro="")
         {
             return await _context.Usuarios
@@ -29,6 +31,7 @@ namespace Backend.Controllers
         }
 
         [HttpGet("deleteds")]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<Usuario>>> GetDeletedsUsuarios()
         {
             return await _context.Usuarios
@@ -39,6 +42,7 @@ namespace Backend.Controllers
 
         // GET: api/Usuarios/5
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<Usuario>> GetUsuario(int id)
         {
             var usuario = await _context.Usuarios.AsNoTracking()
@@ -55,6 +59,7 @@ namespace Backend.Controllers
 
         // GET: api/Usuarios/5
         [HttpGet("byemail")]
+        [Authorize]
         public async Task<ActionResult<Usuario>> GetByEmailUsuario([FromQuery] string? email)
         {
             if (string.IsNullOrEmpty(email))
@@ -72,6 +77,7 @@ namespace Backend.Controllers
 
         // PUT: api/Usuarios/5
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> PutUsuario(int id, Usuario usuario)
         {
             if (id != usuario.Id)
@@ -100,8 +106,21 @@ namespace Backend.Controllers
             return NoContent();
         }
 
+        [HttpPost("login")]
+        public async Task<ActionResult<bool>> LoginInSystem([FromBody] LoginDTO loginDTO)
+        {
+            var usuario = await _context.Usuarios
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Email.Equals(loginDTO.Username) &&
+                                          u.Password.Equals(loginDTO.Password.GetHashSha256()));
+            if (usuario == null)
+                return Unauthorized("Credenciales inválidas");
+            return true;
+        }
+
         // POST: api/Usuarios
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<Usuario>> PostUsuario(Usuario usuario)
         {
             var usuarioExistente = await _context.Usuarios
@@ -133,6 +152,7 @@ namespace Backend.Controllers
 
         // DELETE: api/Usuarios/5
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteUsuario(int id)
         {
             var usuario = await _context.Usuarios.FindAsync(id);
@@ -148,6 +168,7 @@ namespace Backend.Controllers
         }
 
         [HttpPut("restore/{id}")]
+        [Authorize]
         public async Task<IActionResult> RestoreUsuario(int id)
         {
             var usuario = await _context.Usuarios.IgnoreQueryFilters().FirstOrDefaultAsync(u=>u.Id.Equals(id));

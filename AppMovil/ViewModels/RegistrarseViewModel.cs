@@ -2,8 +2,11 @@
 using CommunityToolkit.Mvvm.Input;
 using Firebase.Auth;
 using Service.Enums;
+using Service.ExtentionMethods;
 using Service.Models;
+using Service.Models.InstitutoApp;
 using Service.Services;
+using System.Text.RegularExpressions;
 
 namespace AppMovil.ViewModels
 {
@@ -11,20 +14,43 @@ namespace AppMovil.ViewModels
     {
         AuthService _authService= new();
         UsuarioService _usuarioService= new();
+        InstitutoAppService _institutoAppService= new();
         public IRelayCommand RegistrarseCommand { get; }
         public IRelayCommand VolverCommand { get; }
+        public IRelayCommand ObtenerDatosAppInstitutoCommand { get; }
 
 
         [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(RegistrarseCommand))]
         private string nombre;
-
+        
         [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(ObtenerDatosAppInstitutoCommand))]
+        [NotifyCanExecuteChangedFor(nameof(RegistrarseCommand))]
         private string mail;
 
         [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(RegistrarseCommand))]
+        private string dni;
+
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(RegistrarseCommand))]
+        private string domicilio;
+
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(RegistrarseCommand))]
+        private string telefono;
+
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(RegistrarseCommand))]
+        private TipoRolEnum tipoRol=TipoRolEnum.Alumno;
+
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(RegistrarseCommand))]
         private string password;
 
         [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(RegistrarseCommand))]
         private string verifyPassword;
 
         [ObservableProperty]
@@ -32,8 +58,90 @@ namespace AppMovil.ViewModels
 
         public RegistrarseViewModel()
         {
-            RegistrarseCommand = new RelayCommand(Registrarse);
+            RegistrarseCommand = new RelayCommand(Registrarse,CanRegistrarse);
             VolverCommand = new AsyncRelayCommand(OnVolver);
+            ObtenerDatosAppInstitutoCommand = new AsyncRelayCommand(ObtenerDatosAppInstituto,CanObtenerDatosAppInstituto);
+        }
+
+        private bool CanRegistrarse()
+        {
+            if (!IsBusy)
+            {
+                return !string.IsNullOrEmpty(Nombre) &&
+                   !string.IsNullOrEmpty(Mail) &&
+                   !string.IsNullOrEmpty(Password) &&
+                   !string.IsNullOrEmpty(VerifyPassword) &&
+                   (Password.Length >= 6) &&
+                   !string.IsNullOrEmpty(Dni) &&
+                   !string.IsNullOrEmpty(Domicilio) &&
+                   !string.IsNullOrEmpty(Telefono);
+            } 
+            return false;
+        }
+
+        private bool CanObtenerDatosAppInstituto()
+        {
+            // comprobamos con una expresión regular que el mail tenga formato válido
+            if (string.IsNullOrEmpty(Mail)) return false;
+            var emailPattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+            //explico con lujo de detalle la composición del patrón:
+
+            return Regex.IsMatch(Mail, emailPattern);
+        }
+
+        private async Task ObtenerDatosAppInstituto()
+        {
+
+            IsBusy = true;
+            try
+            {
+                var institutoAppData = await _institutoAppService.GetUsuarioByEmailAsync(Mail);
+                if (institutoAppData is not null)
+                {
+                    Nombre = institutoAppData.Nombre;
+                    Dni = institutoAppData?.Alumno?.Dni ?? "";
+                    Domicilio = institutoAppData?.Alumno?.Direccion ?? "";
+                    Telefono = institutoAppData?.Alumno?.Telefono ?? "";
+
+                    if (institutoAppData?.Docente != null)
+                    {
+                        TipoRol = TipoRolEnum.Docente;
+                    }
+                    else
+                    {
+                        TipoRol = TipoRolEnum.Alumno;
+                        //foreach (var carreraInscripto in institutoAppData?.Alumno?.InscripcionesACarreras)
+                        //{
+                        //    if (carreraInscripto.Carrera != null)
+                        //    {
+                        //        usuario.CarrerasInscriptas.Add(new UsuarioCarrera()
+                        //        {
+                        //            CarreraId = carreraInscripto.Carrera.Id,
+                        //            Carrera = new Carrera
+                        //            {
+                        //                Nombre = carreraInscripto.Carrera.Nombre
+                        //            }
+                        //        });
+                        //    }
+                        //}
+                    }
+
+
+                }
+                else
+                {
+                    //mostramos con DisplayAlert que no se encontraron datos
+                    await Application.Current.MainPage.DisplayAlert("Obtener Datos", "No se encontraron datos asociados a ese correo en la base de datos del instituto.", "Ok");
+                }
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert("Obtener Datos", "Ocurrió un problema al obtener los datos: " + ex.Message, "Ok");
+            }
+            finally
+            {
+                IsBusy = false;
+            }
         }
 
         private async Task OnVolver()
@@ -64,7 +172,7 @@ namespace AppMovil.ViewModels
                 }
                 else
                 {
-                    var newUser = new Usuario { Nombre = Nombre, Email = Mail, TipoRol = TipoRolEnum.Alumno, Dni = "12345678", Password = Password };
+                    var newUser = new Service.Models.Usuario { Nombre = Nombre, Email = Mail, TipoRol = TipoRol, Dni = Dni, Password = Password.GetHashSha256(), Domicilio= Domicilio, Telefono= Telefono };
                     await _usuarioService.AddAsync(newUser);
                     await Application.Current.MainPage.DisplayAlert("Registrarse", "Cuenta creada!", "Ok");
                     if (Application.Current?.MainPage is AppShell shell)
