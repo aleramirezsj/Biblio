@@ -20,7 +20,7 @@ namespace BiblioTestProject
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables()
                 .Build();
-            var institutoAppService = new InstitutoAppService(configuration);
+            var institutoAppService = new InstitutoAppService();
             var email = "bridamore17@gmail.com";
             // Act
             var usuario = await institutoAppService.GetUsuarioByEmailAsync(email);

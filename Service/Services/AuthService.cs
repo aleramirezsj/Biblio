@@ -1,16 +1,7 @@
-﻿using Firebase.Auth;
-using Microsoft.Extensions.Configuration;
-using Service.DTOs;
+﻿using Service.DTOs;
 using Service.Interfaces;
 using Service.Utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Service.Services
 {
@@ -115,10 +106,32 @@ namespace Service.Services
             {
                 throw new Exception("Error al resetear el password->: " + ex.Message);
             }
-
-
-
-
+        }
+        public async Task<bool> DeleteUser(LoginDTO? login)
+        {
+            if (login == null)
+            {
+                throw new ArgumentException("El objeto login no llego.");
+            }
+            try
+            {
+                var urlApi = Properties.Resources.UrlApi;
+                var endpointAuth = ApiEndpoints.GetEndpoint("Login");
+                var client = new HttpClient();
+                var response = await client.PostAsJsonAsync($"{urlApi}{endpointAuth}/deleteuser/", login);
+                if (response.IsSuccessStatusCode)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al eliminar el usuario en firebase->: " + ex.Message);
+            }
         }
     }
 }

@@ -129,7 +129,13 @@ namespace Backend.Controllers
                                       u.Dni.Equals(usuario.Dni));
             if (usuarioExistente != null)
                 return Conflict("Ya existe un usuario con el mismo email o DNI");
-            
+
+            //attach carreras en UsuarioCarrera
+            foreach (var usuarioCarrera in usuario.CarrerasInscriptas)
+            {
+                _context.TryAttach(usuarioCarrera.Carrera);
+            }
+
             _context.Usuarios.Add(usuario);
             try
             {

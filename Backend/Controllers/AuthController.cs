@@ -86,6 +86,21 @@ namespace Backend.Controllers
             }
         }
 
+        [HttpPost("deleteuser")]
+        public async Task<IActionResult> DeleteUser([FromBody] LoginDTO login)
+        {
+            try
+            {
+                var credentials = await firebaseAuthClient.SignInWithEmailAndPasswordAsync(login.Username, login.Password);
+                await firebaseAuthClient.User.DeleteAsync();
+                return Ok();
+            }
+            catch (FirebaseAuthException ex)
+            {
+                return BadRequest(new { message = ex.Reason.ToString() });
+            }
+        }
+
         private async Task SendVerificationEmailAsync(string idToken)
         {
             var RequestUri = "https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=" + _config.ApiKey;

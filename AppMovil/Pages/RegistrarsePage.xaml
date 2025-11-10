@@ -24,14 +24,15 @@
                  WidthRequest="50"
                  HeightRequest="50"
                  Margin="0,0,0,20"/>
-            <Grid RowDefinitions="2*,2*,*,2*,2*,2*,2*,2*,2*,*,*" ColumnDefinitions="*,2*">
+
+            <Grid RowDefinitions="2*,2*,*,2*,2*,2*,2*,2*,Auto,Auto,Auto,Auto" ColumnDefinitions="Auto,*">
                 <Label Grid.Row="0" Grid.Column="0" 
                     HorizontalTextAlignment="End"
                     VerticalTextAlignment="Center"
                     Margin="5,10">Apellido y Nombre:</Label>
                 <Entry Grid.Row="0" Grid.Column="1" 
                     Text="{Binding Nombre}"
-                    Margin="10,20,10,20"></Entry>
+                    Margin="10,20,10,20"/>
                 
                 <Label Grid.Row="1" Grid.Column="0" 
                     HorizontalTextAlignment="End"
@@ -39,13 +40,12 @@
                     Margin="10,20">Email:</Label>
                 <Entry Grid.Row="1" Grid.Column="1" 
                     Text="{Binding Mail}"
-                    Margin="10,20,10,20"></Entry>
+                    Margin="10,20,10,20"/>
                 
                 <Button Text="Obtener datos de App Instituto"
                      Command="{Binding ObtenerDatosAppInstitutoCommand}"
                      Grid.Row="2" Grid.Column="1"
-                     Margin="10,10"
-                     ></Button>
+                     Margin="10,10"/>
                 <ActivityIndicator IsRunning="{Binding IsBusy}"
                                    Grid.Row="2" Grid.Column="0"/>
 
@@ -55,9 +55,8 @@
                     Margin="10,20">DNI:</Label>
                 <Entry Grid.Row="3" Grid.Column="1" 
                     Text="{Binding Dni}"
-                    Margin="10,20,10,20"></Entry>
+                    Margin="10,20,10,20"/>
                 
-
                 
                 <Label Grid.Row="4" Grid.Column="0" 
                     HorizontalTextAlignment="End"
@@ -65,7 +64,7 @@
                     Margin="10,20">Domicilio:</Label>
                 <Entry Grid.Row="4" Grid.Column="1" 
                     Text="{Binding Domicilio}"
-                    Margin="10,20,10,20"></Entry>
+                    Margin="10,20,10,20"/>
                 
                 <Label Grid.Row="5" Grid.Column="0" 
                     HorizontalTextAlignment="End"
@@ -73,7 +72,7 @@
                     Margin="10,20">Teléfono:</Label>
                 <Entry Grid.Row="5" Grid.Column="1" 
                     Text="{Binding Telefono}"
-                    Margin="10,20,10,20"></Entry>
+                    Margin="10,20,10,20"/>
                 
                 <Label Grid.Row="6" Grid.Column="0" 
                     HorizontalTextAlignment="End"
@@ -82,7 +81,7 @@
                 <Entry Grid.Row="6" Grid.Column="1" 
                     Text="{Binding TipoRol}"
                     IsReadOnly="True"
-                    Margin="10,20,10,20"></Entry>  
+                    Margin="10,20,10,20"/>  
                 
                 <Label Grid.Row="7" Grid.Column="0" 
                     HorizontalTextAlignment="End"
@@ -90,7 +89,7 @@
                     Margin="10,20">Contraseña:</Label>
                 <Entry Grid.Row="7" Grid.Column="1" 
                     Text="{Binding Password}"
-                    Margin="10,20,100,20" IsPassword="True"></Entry>
+                    Margin="10,20,100,20" IsPassword="True"/>
 
                 <Label Grid.Row="8" Grid.Column="0" 
                     HorizontalTextAlignment="End"
@@ -98,16 +97,120 @@
                     Margin="10,20">Verificar Contraseña:</Label>
                 <Entry Grid.Row="8" Grid.Column="1" 
                     Text="{Binding VerifyPassword}"
-                    Margin="10,20,100,20" IsPassword="True"></Entry>
+                    Margin="10,20,100,20" IsPassword="True"/>
+                <!-- Sección Carreras -->
+                <StackLayout Spacing="10" Grid.Row="9" Grid.ColumnSpan="2">
+                    <Label Text="Carreras"
+                       TextColor="#2C3E50"
+                       FontSize="14"
+                       FontAttributes="Bold"/>
+
+                    <Frame BackgroundColor="#F8F9FA"
+                       Padding="15"
+                       CornerRadius="8"
+                       HasShadow="False"
+                       BorderColor="#BDC3C7">
+                <StackLayout Spacing="15">
+                            <!-- Carreras seleccionadas -->
+                <StackLayout Spacing="5">
+                    <Label Text="Carreras seleccionadas:"
+                       TextColor="#27AE60"
+                       FontSize="12"
+                       FontAttributes="Bold"/>
+                    <CollectionView ItemsSource="{Binding CarrerasSeleccionadas}"
+                                HeightRequest="80">
+                        <CollectionView.EmptyView>
+                            <Label Text="No hay carreras seleccionadas"
+                               TextColor="#95A5A6"
+                               FontSize="12"
+                               HorizontalOptions="Center"
+                               Margin="0,10"/>
+                        </CollectionView.EmptyView>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Frame Padding="8,5" 
+                                   Margin="0,2"
+                                   BackgroundColor="#D5F4E6"
+                                   BorderColor="#27AE60"
+                                   CornerRadius="5"
+                                   HasShadow="False">
+                                    <Frame.GestureRecognizers>
+                                        <TapGestureRecognizer 
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:RegistrarseViewModel}}, Path=ToggleCarreraCommand}"
+                                        CommandParameter="{Binding CarreraId}"/>
+                                    </Frame.GestureRecognizers>
+                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                        <Label Grid.Column="0"
+                                           Text="☑"
+                                           FontSize="18"
+                                           TextColor="#27AE60"
+                                           VerticalOptions="Center"/>
+                                        <Label Grid.Column="1"
+                                           Text="{Binding Carrera.Nombre}"
+                                           TextColor="#2C3E50"
+                                           FontSize="13"
+                                           VerticalOptions="Center"/>
+                                    </Grid>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </StackLayout>
+
+                <BoxView HeightRequest="1" BackgroundColor="#E8E8E8"/>
+
+                <!-- Carreras disponibles -->
+                <StackLayout Spacing="5">
+                    <Label Text="Toque para seleccionar:"
+                       TextColor="#7F8C8D"
+                       FontSize="12"
+                       FontAttributes="Bold"/>
+                    <CollectionView ItemsSource="{Binding CarrerasDisponibles}"
+                                HeightRequest="150">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Frame Padding="8,5" 
+                                   Margin="0,2"
+                                   BackgroundColor="White"
+                                   BorderColor="#E8E8E8"
+                                   CornerRadius="5"
+                                   HasShadow="False">
+                                    <Frame.GestureRecognizers>
+                                        <TapGestureRecognizer 
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:RegistrarseViewModel}}, Path=ToggleCarreraCommand}"
+                                        CommandParameter="{Binding Id}"/>
+                                    </Frame.GestureRecognizers>
+                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                        <Label Grid.Column="0"
+                                           Text="☐"
+                                           FontSize="18"
+                                           TextColor="#3498DB"
+                                           VerticalOptions="Center"/>
+                                        <Label Grid.Column="1"
+                                           Text="{Binding Nombre}"
+                                           TextColor="#2C3E50"
+                                           FontSize="13"
+                                           VerticalOptions="Center"/>
+                                    </Grid>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </StackLayout>
+                </StackLayout>
+                </Frame>
+
+                <BoxView HeightRequest="1"
+             BackgroundColor="#BDC3C7"/>
+                </StackLayout>
 
                 <Button Text="Registrarse"
                      Command="{Binding RegistrarseCommand}"
-                     Grid.Row="9" Grid.Column="0"
+                     Grid.Row="11" Grid.Column="0"
                      Grid.ColumnSpan="2"
-                     Margin="100,10"
-                     ></Button>
+                     Margin="100,10"/>
                 <ActivityIndicator IsRunning="{Binding IsBusy}"
-                                   Grid.Row="10" Grid.ColumnSpan="2"/>
+                                   Grid.Row="12" Grid.ColumnSpan="2"/>
             </Grid>
         </VerticalStackLayout>
     </ScrollView>

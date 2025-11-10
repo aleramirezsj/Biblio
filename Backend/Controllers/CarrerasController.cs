@@ -25,6 +25,7 @@ namespace Backend.Controllers
         }
 
         [HttpGet("deleteds")]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<Carrera>>> GetDeletedsCarreras()
         {
             return await _context.Carreras
@@ -35,6 +36,7 @@ namespace Backend.Controllers
 
         // GET: api/Carreras/5
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<Carrera>> GetCarrera(int id)
         {
             var carrera = await _context.Carreras.AsNoTracking().FirstOrDefaultAsync(c=>c.Id.Equals(id));
@@ -49,6 +51,7 @@ namespace Backend.Controllers
 
         // PUT: api/Carreras/5
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> PutCarrera(int id, Carrera carrera)
         {
             if (id != carrera.Id)
@@ -79,6 +82,7 @@ namespace Backend.Controllers
 
         // POST: api/Carreras
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<Carrera>> PostCarrera(Carrera carrera)
         {
             _context.Carreras.Add(carrera);
@@ -89,6 +93,7 @@ namespace Backend.Controllers
 
         // DELETE: api/Carreras/5
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteCarrera(int id)
         {
             var carrera = await _context.Carreras.FindAsync(id);
@@ -104,6 +109,7 @@ namespace Backend.Controllers
         }
 
         [HttpPut("restore/{id}")]
+        [Authorize]
         public async Task<IActionResult> RestoreCarrera(int id)
         {
             var carrera = await _context.Carreras.IgnoreQueryFilters().FirstOrDefaultAsync(c=>c.Id.Equals(id));

@@ -3,64 +3,81 @@ using CommunityToolkit.Mvvm.Input;
 using Firebase.Auth;
 using Service.Enums;
 using Service.ExtentionMethods;
-using Service.Models;
-using Service.Models.InstitutoApp;
 using Service.Services;
+using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
+using System.Linq;
+using Service.Models;
+using Service.DTOs;
 
 namespace AppMovil.ViewModels
 {
     public partial class RegistrarseViewModel : ObservableObject
     {
-        AuthService _authService= new();
-        UsuarioService _usuarioService= new();
-        InstitutoAppService _institutoAppService= new();
+        private readonly AuthService _authService = new();
+        private readonly UsuarioService _usuarioService = new();
+        private readonly InstitutoAppService _institutoAppService = new();
+        private readonly CarreraService _carreraService = new();
+
         public IRelayCommand RegistrarseCommand { get; }
         public IRelayCommand VolverCommand { get; }
         public IRelayCommand ObtenerDatosAppInstitutoCommand { get; }
-
+        public IRelayCommand<int> ToggleCarreraCommand { get; }
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(RegistrarseCommand))]
-        private string nombre;
-        
+        private string nombre = string.Empty;
+
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(ObtenerDatosAppInstitutoCommand))]
         [NotifyCanExecuteChangedFor(nameof(RegistrarseCommand))]
-        private string mail;
+        private string mail = string.Empty;
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(RegistrarseCommand))]
-        private string dni;
+        private string dni = string.Empty;
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(RegistrarseCommand))]
-        private string domicilio;
+        private string domicilio = string.Empty;
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(RegistrarseCommand))]
-        private string telefono;
+        private string telefono = string.Empty;
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(RegistrarseCommand))]
-        private TipoRolEnum tipoRol=TipoRolEnum.Alumno;
+        private TipoRolEnum tipoRol = TipoRolEnum.Alumno;
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(RegistrarseCommand))]
-        private string password;
+        private string password = string.Empty;
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(RegistrarseCommand))]
-        private string verifyPassword;
+        private string verifyPassword = string.Empty;
 
         [ObservableProperty]
         private bool isBusy;
 
+        [ObservableProperty]
+        private ObservableCollection<Carrera> carreras = new();
+
+        // Colección de carreras disponibles (Backend principal)
+        [ObservableProperty]
+        private ObservableCollection<Carrera> carrerasDisponibles = new();
+
+        // Carreras seleccionadas por el usuario (relaciones)
+        [ObservableProperty]
+        private ObservableCollection<UsuarioCarrera> carrerasSeleccionadas = new();
+
         public RegistrarseViewModel()
         {
-            RegistrarseCommand = new RelayCommand(Registrarse,CanRegistrarse);
+            RegistrarseCommand = new RelayCommand(Registrarse, CanRegistrarse);
             VolverCommand = new AsyncRelayCommand(OnVolver);
-            ObtenerDatosAppInstitutoCommand = new AsyncRelayCommand(ObtenerDatosAppInstituto,CanObtenerDatosAppInstituto);
+            ObtenerDatosAppInstitutoCommand = new AsyncRelayCommand(ObtenerDatosAppInstituto, CanObtenerDatosAppInstituto);
+            ToggleCarreraCommand = new RelayCommand<int>(ToggleCarrera);
+            _ = CargarCarrerasAsync();
         }
 
         private bool CanRegistrarse()
@@ -68,30 +85,26 @@ namespace AppMovil.ViewModels
             if (!IsBusy)
             {
                 return !string.IsNullOrEmpty(Nombre) &&
-                   !string.IsNullOrEmpty(Mail) &&
-                   !string.IsNullOrEmpty(Password) &&
-                   !string.IsNullOrEmpty(VerifyPassword) &&
-                   (Password.Length >= 6) &&
-                   !string.IsNullOrEmpty(Dni) &&
-                   !string.IsNullOrEmpty(Domicilio) &&
-                   !string.IsNullOrEmpty(Telefono);
-            } 
+                       !string.IsNullOrEmpty(Mail) &&
+                       !string.IsNullOrEmpty(Password) &&
+                       !string.IsNullOrEmpty(VerifyPassword) &&
+                       Password.Length >= 6 &&
+                       !string.IsNullOrEmpty(Dni) &&
+                       !string.IsNullOrEmpty(Domicilio) &&
+                       !string.IsNullOrEmpty(Telefono);
+            }
             return false;
         }
 
         private bool CanObtenerDatosAppInstituto()
         {
-            // comprobamos con una expresión regular que el mail tenga formato válido
             if (string.IsNullOrEmpty(Mail)) return false;
             var emailPattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
-            //explico con lujo de detalle la composición del patrón:
-
             return Regex.IsMatch(Mail, emailPattern);
         }
 
         private async Task ObtenerDatosAppInstituto()
         {
-
             IsBusy = true;
             try
             {
@@ -99,9 +112,9 @@ namespace AppMovil.ViewModels
                 if (institutoAppData is not null)
                 {
                     Nombre = institutoAppData.Nombre;
-                    Dni = institutoAppData?.Alumno?.Dni ?? "";
-                    Domicilio = institutoAppData?.Alumno?.Direccion ?? "";
-                    Telefono = institutoAppData?.Alumno?.Telefono ?? "";
+                    Dni = institutoAppData?.Alumno?.Dni ?? string.Empty;
+                    Domicilio = institutoAppData?.Alumno?.Direccion ?? string.Empty;
+                    Telefono = institutoAppData?.Alumno?.Telefono ?? string.Empty;
 
                     if (institutoAppData?.Docente != null)
                     {
@@ -110,37 +123,91 @@ namespace AppMovil.ViewModels
                     else
                     {
                         TipoRol = TipoRolEnum.Alumno;
-                        //foreach (var carreraInscripto in institutoAppData?.Alumno?.InscripcionesACarreras)
-                        //{
-                        //    if (carreraInscripto.Carrera != null)
-                        //    {
-                        //        usuario.CarrerasInscriptas.Add(new UsuarioCarrera()
-                        //        {
-                        //            CarreraId = carreraInscripto.Carrera.Id,
-                        //            Carrera = new Carrera
-                        //            {
-                        //                Nombre = carreraInscripto.Carrera.Nombre
-                        //            }
-                        //        });
-                        //    }
-                        //}
+                        // Mapear inscripciones del instituto a modelo backend Carrera
+                        if (institutoAppData?.Alumno?.InscripcionesACarreras is not null)
+                        {
+                            foreach (var ins in institutoAppData.Alumno.InscripcionesACarreras)
+                            {
+                                if (ins.Carrera != null && !CarrerasSeleccionadas.Any(c => c.CarreraId == ins.Carrera.Id))
+                                {
+                                    ToggleCarrera(ins.Carrera.Id);
+                                }
+                            }
+                        }
                     }
-
-
                 }
                 else
                 {
-                    //mostramos con DisplayAlert que no se encontraron datos
-                    await Application.Current.MainPage.DisplayAlert("Obtener Datos", "No se encontraron datos asociados a ese correo en la base de datos del instituto.", "Ok");
+                    await Application.Current.MainPage.DisplayAlert("Obtener Datos", "No se encontraron datos asociados a ese correo.", "Ok");
                 }
             }
             catch (Exception ex)
             {
-                await Application.Current.MainPage.DisplayAlert("Obtener Datos", "Ocurrió un problema al obtener los datos: " + ex.Message, "Ok");
+                await Application.Current.MainPage.DisplayAlert("Obtener Datos", "Problema: " + ex.Message, "Ok");
             }
             finally
             {
                 IsBusy = false;
+            }
+        }
+
+        private async Task CargarCarrerasAsync()
+        {
+            if (IsBusy) return;
+            IsBusy = true;
+            try
+            {
+                var lista = await _carreraService.GetAllAsync();
+                Carreras.Clear();
+                if (lista != null)
+                {
+                    foreach (var c in lista.Where(c => !c.IsDeleted))
+                    {
+                        Carreras.Add(c);
+                    }
+                }
+                CarrerasDisponibles = new ObservableCollection<Carrera>(Carreras.OrderBy(c=>c.Nombre));
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert("Carreras", "Error al cargar carreras: " + ex.Message, "Ok");
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        private void ToggleCarrera(int carreraId)
+        {
+            var carrera = CarrerasDisponibles.FirstOrDefault(c => c.Id == carreraId);
+            if (carrera != null)
+                carrerasDisponibles.Remove(carrera);
+            else
+            {
+                var carreraAVolverADisponibles = Carreras.FirstOrDefault(c => c.Id == carreraId);
+                if (carreraAVolverADisponibles != null)
+                {
+                    CarrerasDisponibles.Add(carreraAVolverADisponibles);
+                    CarrerasDisponibles= new ObservableCollection<Carrera>(CarrerasDisponibles.OrderBy(c => c.Nombre));
+                }
+            }
+
+            var carreraSeleccionada = Carreras.FirstOrDefault(c => c.Id == carreraId);
+
+            var existente = CarrerasSeleccionadas.FirstOrDefault(x => x.CarreraId == carreraId);
+            if (existente != null)
+            {
+                CarrerasSeleccionadas.Remove(existente);
+            }
+            else
+            {
+                CarrerasSeleccionadas.Add(new UsuarioCarrera
+                {
+                    CarreraId = carreraSeleccionada.Id,
+                    Carrera = new Carrera { Id = carreraSeleccionada.Id, Nombre = carreraSeleccionada.Nombre }
+                });
+                CarrerasSeleccionadas= new ObservableCollection<UsuarioCarrera>(CarrerasSeleccionadas.OrderBy(c => c.Carrera.Nombre));
             }
         }
 
@@ -149,7 +216,7 @@ namespace AppMovil.ViewModels
             if (Application.Current?.MainPage is AppShell shell)
             {
                 await shell.GoToAsync("//LoginPage");
-            }   
+            }
         }
 
         private async void Registrarse()
@@ -159,38 +226,55 @@ namespace AppMovil.ViewModels
             if (Password != VerifyPassword)
             {
                 await Application.Current.MainPage.DisplayAlert("Registrarse", "Las contraseñas ingresadas no coinciden", "Ok");
+                IsBusy = false;
                 return;
             }
 
             try
             {
-                var user = await _authService.CreateUserWithEmailAndPasswordAsync(Mail, Password, Nombre);
-                if (user == false)
+                var userOk = await _authService.CreateUserWithEmailAndPasswordAsync(Mail, Password, Nombre);
+                if (!userOk)
                 {
                     await Application.Current.MainPage.DisplayAlert("Registrarse", "No se pudo crear el usuario", "Ok");
                     return;
                 }
-                else
+
+                var nuevoUsuario = new Usuario
                 {
-                    var newUser = new Service.Models.Usuario { Nombre = Nombre, Email = Mail, TipoRol = TipoRol, Dni = Dni, Password = Password.GetHashSha256(), Domicilio= Domicilio, Telefono= Telefono };
-                    await _usuarioService.AddAsync(newUser);
-                    await Application.Current.MainPage.DisplayAlert("Registrarse", "Cuenta creada!", "Ok");
-                    if (Application.Current?.MainPage is AppShell shell)
+                    Nombre = Nombre,
+                    Email = Mail,
+                    TipoRol = TipoRol,
+                    Dni = Dni,
+                    Password = Password.GetHashSha256(),
+                    Domicilio = Domicilio,
+                    Telefono = Telefono,
+                    CarrerasInscriptas = CarrerasSeleccionadas.Select(cs => new UsuarioCarrera
                     {
-                        await shell.GoToAsync("//LoginPage");
-                    }
+                        CarreraId = cs.CarreraId,
+                        Carrera = cs.Carrera
+                    }).ToList()
+                };
+
+                await _usuarioService.AddAsync(nuevoUsuario);
+                await Application.Current.MainPage.DisplayAlert("Registrarse", "Cuenta creada!", "Ok");
+                if (Application.Current?.MainPage is AppShell shell)
+                {
+                    await shell.GoToAsync("//LoginPage");
                 }
             }
-            catch (FirebaseAuthException error) // Use alias here 
+            catch (FirebaseAuthException error)
             {
-                await Application.Current.MainPage.DisplayAlert("Registrarse", "Ocurrió un problema:" + error.Reason, "Ok");
-
+                await Application.Current.MainPage.DisplayAlert("Registrarse", "Problema: " + error.Reason, "Ok");
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert("Registrarse", "Error: " + ex.Message, "Ok");
+                await _authService.DeleteUser(new LoginDTO() { Password=Password, Username=Mail});
             }
             finally
             {
                 IsBusy = false;
             }
-
         }
     }
 }

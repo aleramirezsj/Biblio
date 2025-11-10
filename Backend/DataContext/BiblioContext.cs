@@ -110,23 +110,22 @@ modelBuilder.Entity<Usuario>().HasData(
     new Usuario { Id = 9, Nombre = "Miguel Castro", Email = "miguel9@mail.com", Password = "pass9", TipoRol = Service.Enums.TipoRolEnum.Docente, FechaRegistracion = new DateTime(2023,1,9), Dni = "10000009", Domicilio = "Calle 9", Telefono = "9999999", Observacion = "", IsDeleted = false },
     new Usuario { Id = 10, Nombre = "Elena Vargas", Email = "elena10@mail.com", Password = "pass10", TipoRol = Service.Enums.TipoRolEnum.Alumno, FechaRegistracion = new DateTime(2023,1,10), Dni = "10000010", Domicilio = "Calle 10", Telefono = "10101010", Observacion = "", IsDeleted = false }
 );
-#endregion
-#region datos semilla de 10 carreras
-modelBuilder.Entity<Carrera>().HasData(
-    new Carrera { Id = 1, Nombre = "Ingeniería Informática", IsDeleted = false },
-    new Carrera { Id = 2, Nombre = "Derecho", IsDeleted = false },
-    new Carrera { Id = 3, Nombre = "Medicina", IsDeleted = false },
-    new Carrera { Id = 4, Nombre = "Psicología", IsDeleted = false },
-    new Carrera { Id = 5, Nombre = "Arquitectura", IsDeleted = false },
-    new Carrera { Id = 6, Nombre = "Administración", IsDeleted = false },
-    new Carrera { Id = 7, Nombre = "Contabilidad", IsDeleted = false },
-    new Carrera { Id = 8, Nombre = "Educación", IsDeleted = false },
-    new Carrera { Id = 9, Nombre = "Biología", IsDeleted = false },
-    new Carrera { Id = 10, Nombre = "Física", IsDeleted = false }
-);
-#endregion
-#region datos semilla de 10 ejemplares
-modelBuilder.Entity<Ejemplar>().HasData(
+            #endregion
+            #region datos semillas de 9 carreras
+            modelBuilder.Entity<Carrera>().HasData(
+                new Carrera { Id = 6, Nombre = "Profesorado de Educación Inicial" },
+                new Carrera { Id = 5, Nombre = "Profesorado de Educ. Secundaria en Cs de la Administración" },
+                new Carrera { Id = 7, Nombre = "Profesorado de Educ. Secundaria en Economía" },
+                new Carrera { Id = 8, Nombre = "Profesorado de Educación Tecnológica" },
+                new Carrera { Id = 1, Nombre = "Técnico Superior en Desarrollo de Software" },
+                new Carrera { Id = 4, Nombre = "Técnico Superior en Enfermería" },
+                new Carrera { Id = 22, Nombre = "Tecnicatura Superior en Gestión de Energías Renovables" },
+                new Carrera { Id = 3, Nombre = "Técnico Superior en Gestión de las Organizaciones" },
+                new Carrera { Id = 2, Nombre = "Técnico Superior en Soporte de Infraestructura en Tecnologías de la Información" }
+            );
+            #endregion
+            #region datos semilla de 10 ejemplares
+            modelBuilder.Entity<Ejemplar>().HasData(
     new Ejemplar { Id = 1, LibroId = 1, Disponible = true, Estado = Service.Enums.EstadoEnum.Excelente, IsDeleted = false },
     new Ejemplar { Id = 2, LibroId = 2, Disponible = true, Estado = Service.Enums.EstadoEnum.MuyBueno, IsDeleted = false },
     new Ejemplar { Id = 3, LibroId = 3, Disponible = true, Estado = Service.Enums.EstadoEnum.Bueno, IsDeleted = false },
