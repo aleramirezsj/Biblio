@@ -5,6 +5,7 @@
 @inject IGenericService<Autor> AutorService
 @inject IGenericService<Genero> GeneroService
 @inject IGenericService<Editorial> EditorialService
+@inject IGeminiService GeminiService
 @rendermode InteractiveServer
 
 <div class="container mt-5">
@@ -307,10 +308,22 @@
         }
     }
 
-    private void PortadaSubida(string nombreArchivo)
+    private async Task PortadaSubida(string nombreArchivo)
     {
         Libro.Portada = nombreArchivo;
-        StateHasChanged();
+        try
+        {
+            var libro = await GeminiService.GetLibroFromPortada(nombreArchivo);
+            if (libro != null)
+                Libro = libro;
+            StateHasChanged();
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine($"Error al obtener datos desde Gemini: {ex.Message}");
+            
+        }
+    
     }
 }
 

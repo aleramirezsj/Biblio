@@ -62,7 +62,7 @@ namespace Service.Services
 
         }
 
-        public async Task<Libro> GetLibroFromPortada(string imageUrl)
+        public async Task<Libro?> GetLibroFromPortada(string imageUrl)
         {
             if (string.IsNullOrEmpty(imageUrl))
             {
@@ -72,7 +72,8 @@ namespace Service.Services
             {
                 var urlApi = _configuration["UrlApi"];
                 var endpointGemini = ApiEndpoints.GetEndpoint("Gemini");
-
+                // limpio la url
+                imageUrl = Uri.EscapeDataString(imageUrl);
                 var response = await _httpClient.GetAsync($"{urlApi}{endpointGemini}/ocr-portada?imageUrl={imageUrl}");
                 if (response.IsSuccessStatusCode)
                 {
@@ -84,18 +85,18 @@ namespace Service.Services
                     }
                     else
                     {
-                        throw new Exception("Error al deserializar el libro desde la respuesta de la API.");
+                        return null;
                     }
 
                 }
-                else
-                {
-                    throw new Exception($"Error en la respuesta de la API: {response.StatusCode} - {response.ReasonPhrase}");
-                }
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var error2=$"Error en la respuesta de la API: {response.StatusCode} - {response.ReasonPhrase}";
+                return null;
+
             }
             catch (Exception ex)
             {
-                throw new Exception("Error al obtener el prompt de Gemini: " + ex.Message);
+                throw new Exception($"Error en la respuesta de la API: {ex.Message}");
             }
         }
     }

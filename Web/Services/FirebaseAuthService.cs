@@ -65,6 +65,7 @@ namespace Web.Services
         {
             var jwtToken = await _jsRuntime.InvokeAsync<string?>("firebaseAuth.getUserToken");
             _memoryCache.Set("jwt", jwtToken);
+            GenericService<object>.jwtToken = jwtToken;
         }
 
         public async Task<string?> GetUserToken()

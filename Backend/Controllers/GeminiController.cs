@@ -92,8 +92,8 @@ namespace Backend.Controllers
 
             // Determina MIME a partir de la respuesta remota y, en su defecto, por magic numbers
             var mime = DetectMime(remoteContentType, bytes);
-            if (mime is null || (mime != "image/jpeg" && mime != "image/png"))
-                return BadRequest("La imagen debe ser JPEG o PNG.");
+            if (mime is null || (mime != "image/jpeg" && mime != "image/png" && mime != "image/webp"))
+                return BadRequest("La imagen debe ser JPEG o PNG o WEBP.");
 
             // Modelo y API key (appsettings.json → "ApiKeyGemini")
             var configuration = new ConfigurationBuilder()
@@ -343,7 +343,7 @@ IMPORTANTE: Tu objetivo es devolver la mayor cantidad de información posible. N
             if (!string.IsNullOrWhiteSpace(contentType))
             {
                 var ct = contentType.Split(';')[0].Trim().ToLowerInvariant();
-                if (ct is "image/jpeg" or "image/jpg" or "image/png") return ct == "image/jpg" ? "image/jpeg" : ct;
+                if (ct is "image/jpeg" or "image/jpg" or "image/png" or "image/webp") return ct == "image/jpg" ? "image/jpeg" : ct;
                 if (ct == "application/octet-stream")
                 {
                     // cae a magic numbers
@@ -356,6 +356,11 @@ IMPORTANTE: Tu objetivo es devolver la mayor cantidad de información posible. N
             if (bytes.Length > 8 &&
                 bytes[0] == 0x89 && bytes[1] == 0x50 && bytes[2] == 0x4E && bytes[3] == 0x47 &&
                 bytes[4] == 0x0D && bytes[5] == 0x0A && bytes[6] == 0x1A && bytes[7] == 0x0A) return "image/png";
+            // Agrego el formato webp (52 49 46 46 ?? ?? ?? ?? 57 45 42 50)
+            if (bytes.Length > 12 &&
+                bytes[0] == 0x52 && bytes[1] == 0x49 && bytes[2] == 0x46 && bytes[3] == 0x46 &&
+                bytes[8] == 0x57 && bytes[9] == 0x45 && bytes[10] == 0x42 && bytes[11] == 0x50) return "image/webp";
+
 
             return null;
         }
