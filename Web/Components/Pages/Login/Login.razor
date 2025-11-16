@@ -55,6 +55,7 @@
                 <button class="btn btn-gradient w-100 mb-3" @onclick="Loguear">
                     <i class="bi bi-box-arrow-in-right me-1"></i> Acceder
                 </button>
+                <ActivityIndicator IsBusy="isBusy" Mensaje="Iniciando sesión..." />
 
                 <div class="d-grid gap-2 d-md-flex justify-content-md-between">
                     <button class="btn btn-outline-secondary" @onclick="RegisterMe">
@@ -105,6 +106,7 @@ else
     string email = string.Empty;
     string password = string.Empty;
     bool rememberPassword = false;
+    bool isBusy = false;
 
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -121,6 +123,7 @@ else
         try
         {
             Console.WriteLine("Loguear llamado");
+            isBusy = true;
             var user = await _firebaseAuthService.SignInWithEmailPassword(email, password, rememberPassword);
             if (user != null)
             {
@@ -147,6 +150,10 @@ else
         catch (Exception ex)
         {
             await _sweetAlert.FireAsync("Error", ex.Message, SweetAlertIcon.Error);
+        }
+        finally
+        {
+            isBusy = false;
         }
 
     }

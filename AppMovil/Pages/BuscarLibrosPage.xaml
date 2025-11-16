@@ -82,7 +82,7 @@
                                    TextColor="DarkBlue"/>
 
                             <!-- Checkboxes de filtros -->
-                            <Grid ColumnDefinitions="*, *" RowDefinitions="Auto, Auto">
+                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto, Auto, Auto">
 
                                 <StackLayout Grid.Column="0" Grid.Row="0" Orientation="Horizontal" Spacing="8">
                                     <CheckBox IsChecked="{Binding FiltrarPorTitulo}" Color="DodgerBlue"/>
@@ -108,6 +108,13 @@
                                 <StackLayout Grid.Column="1" Grid.Row="1" Orientation="Horizontal" Spacing="8">
                                     <CheckBox IsChecked="{Binding FiltrarPorGenero}" Color="DodgerBlue"/>
                                     <Label Text="🎭 Género" 
+                                           VerticalOptions="Center"
+                                           TextColor="DarkSlateGray"/>
+                                </StackLayout>
+
+                                <StackLayout Grid.Column="0" Grid.Row="2" Orientation="Horizontal" Spacing="8">
+                                    <CheckBox IsChecked="{Binding FiltrarPorSinopsis}" Color="DodgerBlue"/>
+                                    <Label Text="🔦 Sinopsis" 
                                            VerticalOptions="Center"
                                            TextColor="DarkSlateGray"/>
                                 </StackLayout>

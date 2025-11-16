@@ -33,6 +33,10 @@
                                 <input type="checkbox" class="form-check-input me-2" @bind="FiltrarPorGenero" />
                                 <label class="form-check-label">🎭 Género</label>
                             </div>
+                            <div class="col-6 d-flex align-items-center">
+                                <input type="checkbox" class="form-check-input me-2" @bind="FiltrarPorSinopsis" />
+                                <label class="form-check-label">🔦 Sinopsis</label>
+                            </div>
                         </div>
                         <button class="btn btn-warning text-white mt-2" @onclick="LimpiarBusqueda">🗑️ Limpiar búsqueda</button>
                     </div>
@@ -58,10 +62,76 @@
     // Estado de búsqueda y filtros
     string SearchText { get; set; } = "";
     bool MostrarFiltros { get; set; } = false;
-    bool FiltrarPorTitulo { get; set; } = true;
-    bool FiltrarPorAutor { get; set; } = false;
-    bool FiltrarPorEditorial { get; set; } = false;
-    bool FiltrarPorGenero { get; set; } = false;
+    private bool filtrarPorTitulo;
+
+    public bool FiltrarPorTitulo
+    {
+        get { return filtrarPorTitulo; }
+        set { filtrarPorTitulo = value; 
+            if (value)
+            {
+                FiltrarPorSinopsis = false;
+            }
+        }
+    }
+    private bool filtrarPorAutor;
+
+    public bool FiltrarPorAutor
+    {
+        get { return filtrarPorAutor; }
+        set { filtrarPorAutor = value; 
+            if (value)
+            {
+                FiltrarPorSinopsis = false;
+            }
+        }
+    }
+    
+    private bool filtrarPorEditorial;
+
+    public bool FiltrarPorEditorial
+    {
+        get { return filtrarPorEditorial; }
+        set { filtrarPorEditorial = value; 
+            if (value)
+            {
+                FiltrarPorSinopsis = false;
+            }
+        }
+    }
+    
+    private bool filtrarPorGenero;
+
+    public bool FiltrarPorGenero
+    {
+        get { return filtrarPorGenero; }
+        set { filtrarPorGenero = value; 
+            if (value)
+            {
+                FiltrarPorSinopsis = false;
+            }
+        }
+    }
+    
+    
+    //desactiva todos los otros filtros si este esta activo
+    private bool filtrarPorSinopsis;
+
+    public bool FiltrarPorSinopsis
+    {
+        get { return filtrarPorSinopsis; }
+        set { filtrarPorSinopsis = value; 
+            if (value)
+            {
+                FiltrarPorTitulo = false;
+                FiltrarPorAutor = false;
+                FiltrarPorEditorial = false;
+                FiltrarPorGenero = false;
+            }
+        }
+    }
+    
+
     bool IsBusy { get; set; } = false;
 
 
@@ -74,6 +144,7 @@
         FiltrarPorAutor = false;
         FiltrarPorEditorial = false;
         FiltrarPorGenero = false;
+        FiltrarPorSinopsis = false;
         await HandleBuscar();
     }
 
@@ -85,7 +156,8 @@
             ForTitulo = FiltrarPorTitulo,
             ForAutor = FiltrarPorAutor,
             ForEditorial = FiltrarPorEditorial,
-            ForGenero = FiltrarPorGenero
+            ForGenero = FiltrarPorGenero,
+            ForSinopsis = FiltrarPorSinopsis
         };
         IsBusy = true;
         await OnBuscar.InvokeAsync(filterDTO);

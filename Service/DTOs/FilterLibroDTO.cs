@@ -13,5 +13,6 @@ namespace Service.DTOs
         public bool ForAutor { get; set; } = false;
         public bool ForEditorial { get; set; } = false;
         public bool ForGenero { get; set; } = false;
+        public bool ForSinopsis { get; set; } = false;
     }
 }

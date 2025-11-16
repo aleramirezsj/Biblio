@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Pgvector;
+using Pgvector.EntityFrameworkCore;
 using Service.DTOs;
 using Service.Interfaces;
 using Service.Models;
@@ -40,6 +41,8 @@ namespace Backend.Controllers
         [HttpPost("withfilter")]
         public async Task<ActionResult<IEnumerable<Libro>>> GetLibroswithfilter(FilterLibroDTO filter)
         {
+            var sinopsisFloats = filter.ForSinopsis? await this._geminiController.CrearEmbeddingAsync(filter.SearchText ?? string.Empty): new float[0];
+            var sinopsisEmbedding = filter.ForSinopsis ? new Vector(sinopsisFloats): null;
             var query = _context.Libros
                 .Include(l => l.Editorial)
                 .Include(l => l.LibrosAutores).ThenInclude(la=> la.Autor)
@@ -47,7 +50,7 @@ namespace Backend.Controllers
                 .AsNoTracking()
                 .AsQueryable();
 
-            if (!string.IsNullOrWhiteSpace(filter.SearchText))
+            if (!string.IsNullOrWhiteSpace(filter.SearchText)&&!filter.ForSinopsis)
             {
                 var search = filter.SearchText.ToLower();
                 query = query.Where(l =>
@@ -59,7 +62,14 @@ namespace Backend.Controllers
 
             }
 
-            return await query.ToListAsync();
+            if(!filter.ForSinopsis) return await query.ToListAsync();
+            // Si se debe filtrar por sinopsis, calcular la similitud y ordenar
+            query = query
+                .Where(l => l.SinopsisEmbedding != null)
+                .OrderBy(l => l.SinopsisEmbedding!.L2Distance(sinopsisEmbedding!))
+                .Take(10); // Limitar a los 20 más similares
+            var result= await query.ToListAsync();
+            return result;
         }
 
         [HttpGet("deleteds")]

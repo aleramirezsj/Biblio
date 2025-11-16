@@ -37,6 +37,9 @@ namespace AppMovil.ViewModels
         private bool filtrarPorGenero = false;
 
         [ObservableProperty]
+        private bool filtrarPorSinopsis = false;
+
+        [ObservableProperty]
         private bool mostrarFiltros = false;
 
         private List<Libro> _todosLosLibros = new();
@@ -64,11 +67,53 @@ namespace AppMovil.ViewModels
         }
 
         // Los cambios en filtros también disparan nueva búsqueda
-        //partial void OnFiltrarPorTituloChanged(bool value) => OnBuscar();
-        //partial void OnFiltrarPorAutorChanged(bool value) => OnBuscar();
-        //partial void OnFiltrarPorEditorialChanged(bool value) => OnBuscar();
-        //partial void OnFiltrarPorGeneroChanged(bool value) => OnBuscar();
-        
+        partial void OnFiltrarPorTituloChanged(bool value) => ActivarDesactivarFiltrosSegunTitulo();
+
+        private void ActivarDesactivarFiltrosSegunTitulo()
+        {
+            if (FiltrarPorTitulo)
+            {
+                FiltrarPorSinopsis = false;
+            }
+        }
+        private void ActivarDesactivarFiltrosSegunGenero()
+        {
+            if (FiltrarPorGenero)
+            {
+                FiltrarPorSinopsis = false;
+            }
+        }
+        private void ActivarDesactivarFiltrosSegunAutor()
+        {
+            if (FiltrarPorAutor)
+            {
+                FiltrarPorSinopsis = false;
+            }
+        }
+        private void ActivarDesactivarFiltrosSegunEditorial()
+        {
+            if (FiltrarPorEditorial)
+            {
+                FiltrarPorSinopsis = false;
+            }
+        }
+
+        partial void OnFiltrarPorAutorChanged(bool value) => ActivarDesactivarFiltrosSegunAutor();
+        partial void OnFiltrarPorEditorialChanged(bool value) => ActivarDesactivarFiltrosSegunEditorial();
+        partial void OnFiltrarPorGeneroChanged(bool value) => ActivarDesactivarFiltrosSegunGenero();
+        partial void OnFiltrarPorSinopsisChanged(bool value) => ActivarDesactivarFiltrarSegunSinopsis();
+
+        private void ActivarDesactivarFiltrarSegunSinopsis()
+        {
+            if (FiltrarPorSinopsis)
+            {
+                FiltrarPorTitulo = false;
+                FiltrarPorAutor = false;
+                FiltrarPorEditorial = false;
+                FiltrarPorGenero = false;
+            }
+            
+        }
 
         private async void OnBuscar()
         {
@@ -84,7 +129,9 @@ namespace AppMovil.ViewModels
                     ForTitulo = this.FiltrarPorTitulo,
                     ForAutor = this.FiltrarPorAutor,
                     ForEditorial = this.FiltrarPorEditorial,
-                    ForGenero = this.FiltrarPorGenero
+                    ForGenero = this.FiltrarPorGenero,
+                    ForSinopsis = this.FiltrarPorSinopsis
+
                 };
                 // Obtener todos los libros si no los tenemos
                  var librosFiltrados= await _libroService.GetWithFilterAsync(filtro);
