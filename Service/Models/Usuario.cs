@@ -19,7 +19,7 @@ namespace Service.Models
         public string Password { get; set; } = string.Empty;
         [Required]
         public TipoRolEnum TipoRol { get; set; } = TipoRolEnum.Alumno;
-        public DateTime FechaRegistracion { get; set; } = DateTime.Now;
+        public DateTimeOffset FechaRegistracion { get; set; } = DateTime.UtcNow;
         [Required]
         public string Dni { get; set; } = string.Empty;
         public string Domicilio { get; set; } = string.Empty;

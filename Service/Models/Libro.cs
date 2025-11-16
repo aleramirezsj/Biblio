@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
+using Pgvector;
 
 namespace Service.Models
 {
@@ -22,6 +24,8 @@ namespace Service.Models
         public string CDU { get; set; } = string.Empty;
         public string Libristica { get; set; } = string.Empty;
         public string PalabrasClave { get; set; } = string.Empty;
+        [JsonIgnore]
+        public Vector? SinopsisEmbedding { get; set; } = null ;
         public bool IsDeleted { get; set; } = false;
         [NotMapped]
         virtual public string Autores

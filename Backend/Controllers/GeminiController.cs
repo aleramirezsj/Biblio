@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Pgvector;
 using Service.DTOs;
 using Service.Models;
 using System.Net.Http.Headers;
@@ -254,13 +255,13 @@ IMPORTANTE: Tu objetivo es devolver la mayor cantidad de información posible. N
                             {
                                 type = "string",
                                 nullable = true,
-                                description = "Frase corta y atractiva de MÁXIMO 20 palabras que capte la esencia del libro. DEBE completarse si el libro es conocido"
+                                description = "Frase corta y atractiva de MÁXIMO 30 palabras que capte la esencia del libro. DEBE completarse si el libro es conocido"
                             },
                             ["Sinopsis"] = new
                             {
                                 type = "string",
                                 nullable = true,
-                                description = "Resumen detallado del libro de MÁXIMO 100 palabras. DEBE completarse si el libro es conocido"
+                                description = "Resumen detallado del libro de MÁXIMO 200 palabras. DEBE completarse si el libro es conocido"
                             },
                             ["CDU"] = new
                             {
@@ -334,7 +335,70 @@ IMPORTANTE: Tu objetivo es devolver la mayor cantidad de información posible. N
                 return StatusCode(502, $"Error parseando JSON del modelo: {ex.Message}. Raw: {jsonPayload}");
             }
             var libro= MapToLibro(bookMetadata!);
+            libro.Portada= imageUrl;
             return Ok(libro);
+        }
+
+        /// <summary>
+        /// Nuevo endpoint: genera embedding de un texto (por ejemplo sinopsis).
+        /// </summary>
+        [HttpGet("embed")]
+        public async Task<float[]> CrearEmbeddingAsync(string texto, CancellationToken ct = default)
+        {
+            // Modelo y API key (appsettings.json → "ApiKeyGemini")
+            var configuration = new ConfigurationBuilder()
+                     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                     .AddEnvironmentVariables()
+                     .Build();
+            var apiKey = configuration["ApiKeyGemini"];
+            if (string.IsNullOrWhiteSpace(apiKey))
+                throw new InvalidOperationException("Falta configurar ApiKeyGemini en appsettings.json.");
+
+            // Modelo de embeddings recomendado (podés cambiarlo si querés otro) 
+            const string embeddingModel = "models/gemini-embedding-001";
+
+            var url =
+                $"https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key={apiKey}";
+
+            var payload = new
+            {
+                model = embeddingModel,
+                content = new
+                {
+                    parts = new[]
+                    {
+                    new { text = texto }
+                }
+                },
+                // opcional, indica para qué usarás el embedding (mejor semántico): 
+                taskType = "SEMANTIC_SIMILARITY"
+            };
+
+            var json = JsonSerializer.Serialize(payload);
+            var client = new HttpClient();
+
+            using var msg = new HttpRequestMessage(HttpMethod.Post, url)
+            {
+                Content = new StringContent(json, Encoding.UTF8, "application/json")
+            };
+
+            using var resp = await client.SendAsync(msg, ct);
+            var respJson = await resp.Content.ReadAsStringAsync(ct);
+
+            if (!resp.IsSuccessStatusCode)
+                throw new Exception($"Error Gemini embeddings: {(int)resp.StatusCode} - {respJson}");
+
+            using var doc = JsonDocument.Parse(respJson);
+
+            // Estructura típica: { "embedding": { "values": [ ... ] } } 
+            var values = doc.RootElement
+                .GetProperty("embedding")
+                .GetProperty("values")
+                .EnumerateArray()
+                .Select(e => (float)e.GetDouble())
+                .ToArray();
+
+            return values;
         }
 
         // Detección simple de MIME con fallback por magic numbers

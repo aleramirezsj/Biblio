@@ -27,19 +27,46 @@ namespace Backend.DataContext
         // onConfiguring method to set up the database connection
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            //if (!optionsBuilder.IsConfigured)
+            //{
+            //    var configuration = new ConfigurationBuilder()
+            //    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+            //    .AddEnvironmentVariables()
+            //    .Build();
+            //    var connectionString = configuration.GetConnectionString("mysqlRemote");
+            //    optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+            //}
             if (!optionsBuilder.IsConfigured)
             {
                 var configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables()
                 .Build();
-                var connectionString = configuration.GetConnectionString("mysqlRemote");
-                optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+                var connectionString = configuration.GetConnectionString("postgresRemote");
+                optionsBuilder.UseNpgsql(connectionString,
+                            npgsqlOptions => npgsqlOptions.UseVector());
             }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.HasPostgresExtension("vector");
+            modelBuilder.Entity<Libro>(entity =>
+            {
+                entity.ToTable("Libros");
+
+                entity.HasKey(l => l.Id);
+
+                entity.Property(l => l.Titulo)
+                      .IsRequired()
+                      .HasMaxLength(250);
+
+                // Columna vector para embeddings de la sinopsis
+                entity.Property(l => l.SinopsisEmbedding)
+                      .HasColumnType("vector(3072)"); // ajustá al tamaño del embedding que uses
+            });
+            // Forzar DateTime -> "timestamp without time zone" para evitar requerir UTC al sembrar datos
+
 
             #region datos semilla de 10 autores
             modelBuilder.Entity<Autor>().HasData(
@@ -96,20 +123,20 @@ namespace Backend.DataContext
                 new Libro { Id = 9, Titulo = "Veinte poemas de amor", Descripcion = "Poesía chilena", EditorialId = 9, Paginas = 64, AnioPublicacion = 1924, Portada = "portada9.jpg", Sinopsis = "Poemas de amor de Neruda.", IsDeleted = false },
                 new Libro { Id = 10, Titulo = "El laberinto de la soledad", Descripcion = "Ensayo mexicano", EditorialId = 10, Paginas = 228, AnioPublicacion = 1950, Portada = "portada10.jpg", Sinopsis = "Reflexión sobre la identidad mexicana.", IsDeleted = false }
 );
-#endregion
-#region datos semilla de 10 usuarios
-modelBuilder.Entity<Usuario>().HasData(
-    new Usuario { Id = 1, Nombre = "Juan Pérez", Email = "juan1@mail.com", Password = "pass1", TipoRol = Service.Enums.TipoRolEnum.Alumno, FechaRegistracion = new DateTime(2023,1,1), Dni = "10000001", Domicilio = "Calle 1", Telefono = "1111111", Observacion = "", IsDeleted = false },
-    new Usuario { Id = 2, Nombre = "Ana Gómez", Email = "ana2@mail.com", Password = "pass2", TipoRol = Service.Enums.TipoRolEnum.Docente, FechaRegistracion = new DateTime(2023,1,2), Dni = "10000002", Domicilio = "Calle 2", Telefono = "2222222", Observacion = "", IsDeleted = false },
-    new Usuario { Id = 3, Nombre = "Luis Torres", Email = "luis3@mail.com", Password = "pass3", TipoRol = Service.Enums.TipoRolEnum.Bibliotecario, FechaRegistracion = new DateTime(2023,1,3), Dni = "10000003", Domicilio = "Calle 3", Telefono = "3333333", Observacion = "", IsDeleted = false },
-    new Usuario { Id = 4, Nombre = "María López", Email = "maria4@mail.com", Password = "pass4", TipoRol = Service.Enums.TipoRolEnum.Alumno, FechaRegistracion = new DateTime(2023,1,4), Dni = "10000004", Domicilio = "Calle 4", Telefono = "4444444", Observacion = "", IsDeleted = false },
-    new Usuario { Id = 5, Nombre = "Pedro Ruiz", Email = "pedro5@mail.com", Password = "pass5", TipoRol = Service.Enums.TipoRolEnum.Docente, FechaRegistracion = new DateTime(2023,1,5), Dni = "10000005", Domicilio = "Calle 5", Telefono = "5555555", Observacion = "", IsDeleted = false },
-    new Usuario { Id = 6, Nombre = "Lucía Fernández", Email = "lucia6@mail.com", Password = "pass6", TipoRol = Service.Enums.TipoRolEnum.Alumno, FechaRegistracion = new DateTime(2023,1,6), Dni = "10000006", Domicilio = "Calle 6", Telefono = "6666666", Observacion = "", IsDeleted = false },
-    new Usuario { Id = 7, Nombre = "Carlos Díaz", Email = "carlos7@mail.com", Password = "pass7", TipoRol = Service.Enums.TipoRolEnum.Bibliotecario, FechaRegistracion = new DateTime(2023,1,7), Dni = "10000007", Domicilio = "Calle 7", Telefono = "7777777", Observacion = "", IsDeleted = false },
-    new Usuario { Id = 8, Nombre = "Sofía Ramírez", Email = "sofia8@mail.com", Password = "pass8", TipoRol = Service.Enums.TipoRolEnum.Alumno, FechaRegistracion = new DateTime(2023,1,8), Dni = "10000008", Domicilio = "Calle 8", Telefono = "8888888", Observacion = "", IsDeleted = false },
-    new Usuario { Id = 9, Nombre = "Miguel Castro", Email = "miguel9@mail.com", Password = "pass9", TipoRol = Service.Enums.TipoRolEnum.Docente, FechaRegistracion = new DateTime(2023,1,9), Dni = "10000009", Domicilio = "Calle 9", Telefono = "9999999", Observacion = "", IsDeleted = false },
-    new Usuario { Id = 10, Nombre = "Elena Vargas", Email = "elena10@mail.com", Password = "pass10", TipoRol = Service.Enums.TipoRolEnum.Alumno, FechaRegistracion = new DateTime(2023,1,10), Dni = "10000010", Domicilio = "Calle 10", Telefono = "10101010", Observacion = "", IsDeleted = false }
-);
+            #endregion
+            #region datos semilla de 10 usuarios
+            modelBuilder.Entity<Usuario>().HasData(
+                new Usuario { Id = 1, Nombre = "Juan Pérez", Email = "juan1@mail.com", Password = "pass1", TipoRol = Service.Enums.TipoRolEnum.Alumno, FechaRegistracion = new DateTimeOffset(2023, 1, 1, 0, 0, 0, TimeSpan.Zero), Dni = "10000001", Domicilio = "Calle 1", Telefono = "1111111", Observacion = "", IsDeleted = false },
+                new Usuario { Id = 2, Nombre = "Ana Gómez", Email = "ana2@mail.com", Password = "pass2", TipoRol = Service.Enums.TipoRolEnum.Docente, FechaRegistracion = new DateTimeOffset(2023, 1, 2, 0, 0, 0, TimeSpan.Zero), Dni = "10000002", Domicilio = "Calle 2", Telefono = "2222222", Observacion = "", IsDeleted = false },
+                new Usuario { Id = 3, Nombre = "Luis Torres", Email = "luis3@mail.com", Password = "pass3", TipoRol = Service.Enums.TipoRolEnum.Bibliotecario, FechaRegistracion = new DateTimeOffset(2023, 1, 3, 0, 0, 0, TimeSpan.Zero), Dni = "10000003", Domicilio = "Calle 3", Telefono = "3333333", Observacion = "", IsDeleted = false },
+                new Usuario { Id = 4, Nombre = "María López", Email = "maria4@mail.com", Password = "pass4", TipoRol = Service.Enums.TipoRolEnum.Alumno, FechaRegistracion = new DateTimeOffset(2023, 1, 4, 0, 0, 0, TimeSpan.Zero), Dni = "10000004", Domicilio = "Calle 4", Telefono = "4444444", Observacion = "", IsDeleted = false },
+                new Usuario { Id = 5, Nombre = "Pedro Ruiz", Email = "pedro5@mail.com", Password = "pass5", TipoRol = Service.Enums.TipoRolEnum.Docente, FechaRegistracion = new DateTimeOffset(2023, 1, 5, 0, 0, 0, TimeSpan.Zero), Dni = "10000005", Domicilio = "Calle 5", Telefono = "5555555", Observacion = "", IsDeleted = false },
+                new Usuario { Id = 6, Nombre = "Lucía Fernández", Email = "lucia6@mail.com", Password = "pass6", TipoRol = Service.Enums.TipoRolEnum.Alumno, FechaRegistracion = new DateTimeOffset(2023, 1, 6, 0, 0, 0, TimeSpan.Zero), Dni = "10000006", Domicilio = "Calle 6", Telefono = "6666666", Observacion = "", IsDeleted = false },
+                new Usuario { Id = 7, Nombre = "Carlos Díaz", Email = "carlos7@mail.com", Password = "pass7", TipoRol = Service.Enums.TipoRolEnum.Bibliotecario, FechaRegistracion = new DateTimeOffset(2023, 1, 7, 0, 0, 0, TimeSpan.Zero), Dni = "10000007", Domicilio = "Calle 7", Telefono = "7777777", Observacion = "", IsDeleted = false },
+                new Usuario { Id = 8, Nombre = "Sofía Ramírez", Email = "sofia8@mail.com", Password = "pass8", TipoRol = Service.Enums.TipoRolEnum.Alumno, FechaRegistracion = new DateTimeOffset(2023, 1, 8, 0, 0, 0, TimeSpan.Zero), Dni = "10000008", Domicilio = "Calle 8", Telefono = "8888888", Observacion = "", IsDeleted = false },
+                new Usuario { Id = 9, Nombre = "Miguel Castro", Email = "miguel9@mail.com", Password = "pass9", TipoRol = Service.Enums.TipoRolEnum.Docente, FechaRegistracion = new DateTimeOffset(2023, 1, 9, 0, 0, 0, TimeSpan.Zero), Dni = "10000009", Domicilio = "Calle 9", Telefono = "9999999", Observacion = "", IsDeleted = false },
+                new Usuario { Id = 10, Nombre = "Elena Vargas", Email = "elena10@mail.com", Password = "pass10", TipoRol = Service.Enums.TipoRolEnum.Alumno, FechaRegistracion = new DateTimeOffset(2023, 1, 10, 0, 0, 0, TimeSpan.Zero), Dni = "10000010", Domicilio = "Calle 10", Telefono = "10101010", Observacion = "", IsDeleted = false }
+            );
             #endregion
             #region datos semillas de 9 carreras
             modelBuilder.Entity<Carrera>().HasData(
@@ -137,23 +164,23 @@ modelBuilder.Entity<Usuario>().HasData(
     new Ejemplar { Id = 9, LibroId = 9, Disponible = true, Estado = Service.Enums.EstadoEnum.Regular, IsDeleted = false },
     new Ejemplar { Id = 10, LibroId = 10, Disponible = true, Estado = Service.Enums.EstadoEnum.Malo, IsDeleted = false }
 );
-#endregion
-#region datos semilla de 10 prestamos
-modelBuilder.Entity<Prestamo>().HasData(
-    new Prestamo { Id = 1, UsuarioId = 1, EjemplarId = 1, FechaPrestamo = new DateTime(2023,2,1), FechaDevolucion = new DateTime(2023,2,10), IsDeleted = false },
-    new Prestamo { Id = 2, UsuarioId = 2, EjemplarId = 2, FechaPrestamo = new DateTime(2023,2,2), FechaDevolucion = new DateTime(2023,2,11), IsDeleted = false },
-    new Prestamo { Id = 3, UsuarioId = 3, EjemplarId = 3, FechaPrestamo = new DateTime(2023,2,3), FechaDevolucion = new DateTime(2023,2,12), IsDeleted = false },
-    new Prestamo { Id = 4, UsuarioId = 4, EjemplarId = 4, FechaPrestamo = new DateTime(2023,2,4), FechaDevolucion = new DateTime(2023,2,13), IsDeleted = false },
-    new Prestamo { Id = 5, UsuarioId = 5, EjemplarId = 5, FechaPrestamo = new DateTime(2023,2,5), FechaDevolucion = new DateTime(2023,2,14), IsDeleted = false },
-    new Prestamo { Id = 6, UsuarioId = 6, EjemplarId = 6, FechaPrestamo = new DateTime(2023,2,6), FechaDevolucion = new DateTime(2023,2,15), IsDeleted = false },
-    new Prestamo { Id = 7, UsuarioId = 7, EjemplarId = 7, FechaPrestamo = new DateTime(2023,2,7), FechaDevolucion = new DateTime(2023,2,16), IsDeleted = false },
-    new Prestamo { Id = 8, UsuarioId = 8, EjemplarId = 8, FechaPrestamo = new DateTime(2023,2,8), FechaDevolucion = new DateTime(2023,2,17), IsDeleted = false },
-    new Prestamo { Id = 9, UsuarioId = 9, EjemplarId = 9, FechaPrestamo = new DateTime(2023,2,9), FechaDevolucion = new DateTime(2023,2,18), IsDeleted = false },
-    new Prestamo { Id = 10, UsuarioId = 10, EjemplarId = 10, FechaPrestamo = new DateTime(2023,2,10), FechaDevolucion = new DateTime(2023,2,19), IsDeleted = false }
-);
-#endregion
-#region datos semilla de 10 libroautor
-modelBuilder.Entity<LibroAutor>().HasData(
+            #endregion
+            #region datos semilla de 10 prestamos
+            modelBuilder.Entity<Prestamo>().HasData(
+                new Prestamo { Id = 1, UsuarioId = 1, EjemplarId = 1, FechaPrestamo = new DateTimeOffset(2023, 2, 1, 0, 0, 0, TimeSpan.Zero), FechaDevolucion = new DateTimeOffset(2023, 2, 10,0,0,0,TimeSpan.Zero), IsDeleted = false },
+                new Prestamo { Id = 2, UsuarioId = 2, EjemplarId = 2, FechaPrestamo = new DateTimeOffset(2023, 2, 2, 0, 0, 0, TimeSpan.Zero), FechaDevolucion = new DateTimeOffset(2023, 2, 11, 0, 0, 0, TimeSpan.Zero), IsDeleted = false },
+                new Prestamo { Id = 3, UsuarioId = 3, EjemplarId = 3, FechaPrestamo = new DateTimeOffset(2023, 2, 3, 0, 0, 0, TimeSpan.Zero), FechaDevolucion = new DateTimeOffset(2023, 2, 12, 0, 0, 0, TimeSpan.Zero), IsDeleted = false },
+                new Prestamo { Id = 4, UsuarioId = 4, EjemplarId = 4, FechaPrestamo = new DateTimeOffset(2023, 2, 4, 0, 0, 0, TimeSpan.Zero), FechaDevolucion = new DateTimeOffset(2023, 2, 13, 0, 0, 0, TimeSpan.Zero), IsDeleted = false },
+                new Prestamo { Id = 5, UsuarioId = 5, EjemplarId = 5, FechaPrestamo = new DateTimeOffset(2023, 2, 5, 0, 0, 0, TimeSpan.Zero), FechaDevolucion = new DateTimeOffset(2023, 2, 14, 0, 0, 0, TimeSpan.Zero), IsDeleted = false },
+                new Prestamo { Id = 6, UsuarioId = 6, EjemplarId = 6, FechaPrestamo = new DateTimeOffset(2023, 2, 6, 0, 0, 0, TimeSpan.Zero), FechaDevolucion = new DateTimeOffset(2023, 2, 15, 0, 0, 0, TimeSpan.Zero), IsDeleted = false },
+                new Prestamo { Id = 7, UsuarioId = 7, EjemplarId = 7, FechaPrestamo = new DateTimeOffset(2023, 2, 7, 0, 0, 0, TimeSpan.Zero), FechaDevolucion = new DateTimeOffset(2023, 2, 16, 0, 0, 0, TimeSpan.Zero), IsDeleted = false },
+                new Prestamo { Id = 8, UsuarioId = 8, EjemplarId = 8, FechaPrestamo = new DateTimeOffset(2023, 2, 8, 0, 0, 0, TimeSpan.Zero), FechaDevolucion = new DateTimeOffset(2023, 2, 17, 0, 0, 0, TimeSpan.Zero), IsDeleted = false },
+                new Prestamo { Id = 9, UsuarioId = 9, EjemplarId = 9, FechaPrestamo = new DateTimeOffset(2023, 2, 9, 0, 0, 0, TimeSpan.Zero), FechaDevolucion = new DateTimeOffset(2023, 2, 18, 0, 0, 0, TimeSpan.Zero), IsDeleted = false },
+                new Prestamo { Id = 10, UsuarioId = 10, EjemplarId = 10, FechaPrestamo = new DateTimeOffset(2023, 2, 10, 0, 0, 0, TimeSpan.Zero), FechaDevolucion = new DateTimeOffset(2023, 2, 19, 0, 0, 0, TimeSpan.Zero), IsDeleted = false }
+            );
+            #endregion
+            #region datos semilla de 10 libroautor
+            modelBuilder.Entity<LibroAutor>().HasData(
     new LibroAutor { Id = 1, LibroId = 1, AutorId = 1, IsDeleted = false },
     new LibroAutor { Id = 2, LibroId = 2, AutorId = 2, IsDeleted = false },
     new LibroAutor { Id = 3, LibroId = 3, AutorId = 3, IsDeleted = false },
@@ -179,21 +206,20 @@ modelBuilder.Entity<LibroGenero>().HasData(
     new LibroGenero { Id = 9, LibroId = 9, GeneroId = 9, IsDeleted = false },
     new LibroGenero { Id = 10, LibroId = 10, GeneroId = 10, IsDeleted = false }
 );
-#endregion
-#region datos semilla de 10 usuariocarrera
-modelBuilder.Entity<UsuarioCarrera>().HasData(
-    new UsuarioCarrera { Id = 1, UsuarioId = 1, CarreraId = 1, IsDeleted = false },
-    new UsuarioCarrera { Id = 2, UsuarioId = 2, CarreraId = 2, IsDeleted = false },
-    new UsuarioCarrera { Id = 3, UsuarioId = 3, CarreraId = 3, IsDeleted = false },
-    new UsuarioCarrera { Id = 4, UsuarioId = 4, CarreraId = 4, IsDeleted = false },
-    new UsuarioCarrera { Id = 5, UsuarioId = 5, CarreraId = 5, IsDeleted = false },
-    new UsuarioCarrera { Id = 6, UsuarioId = 6, CarreraId = 6, IsDeleted = false },
-    new UsuarioCarrera { Id = 7, UsuarioId = 7, CarreraId = 7, IsDeleted = false },
-    new UsuarioCarrera { Id = 8, UsuarioId = 8, CarreraId = 8, IsDeleted = false },
-    new UsuarioCarrera { Id = 9, UsuarioId = 9, CarreraId = 9, IsDeleted = false },
-    new UsuarioCarrera { Id = 10, UsuarioId = 10, CarreraId = 10, IsDeleted = false }
-);
-#endregion
+            #endregion
+            #region datos semilla de 10 usuariocarrera
+            modelBuilder.Entity<UsuarioCarrera>().HasData(
+                new UsuarioCarrera { Id = 1, UsuarioId = 1, CarreraId = 1, IsDeleted = false },
+                new UsuarioCarrera { Id = 2, UsuarioId = 2, CarreraId = 2, IsDeleted = false },
+                new UsuarioCarrera { Id = 3, UsuarioId = 3, CarreraId = 3, IsDeleted = false },
+                new UsuarioCarrera { Id = 4, UsuarioId = 4, CarreraId = 4, IsDeleted = false },
+                new UsuarioCarrera { Id = 5, UsuarioId = 5, CarreraId = 5, IsDeleted = false },
+                new UsuarioCarrera { Id = 6, UsuarioId = 6, CarreraId = 6, IsDeleted = false },
+                new UsuarioCarrera { Id = 7, UsuarioId = 7, CarreraId = 7, IsDeleted = false },
+                new UsuarioCarrera { Id = 8, UsuarioId = 8, CarreraId = 8, IsDeleted = false },
+                new UsuarioCarrera { Id = 9, UsuarioId = 9, CarreraId = 22, IsDeleted = false }
+            );
+            #endregion
 
             //configuramos los query filters para que no traigan los registros marcados como eliminados
             modelBuilder.Entity<Autor>().HasQueryFilter(a => !a.IsDeleted);
@@ -209,7 +235,7 @@ modelBuilder.Entity<UsuarioCarrera>().HasData(
             modelBuilder.Entity<LibroAutor>().HasQueryFilter(e => !e.IsDeleted);
 
 
-
+            base.OnModelCreating(modelBuilder);
 
 
 

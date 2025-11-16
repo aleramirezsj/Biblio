@@ -4,6 +4,8 @@ using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
+using Service.Interfaces;
+using Service.Services;
 using System.Text.Json.Serialization;
 
 DotNetEnv.Env.Load();
@@ -40,13 +42,17 @@ var configuration = new ConfigurationBuilder()
     .AddEnvironmentVariables()
     .Build();
 
-string cadenaConexion = configuration.GetConnectionString("mysqlRemote");
+//string cadenaConexion = configuration.GetConnectionString("mysqlRemote");
+var cadenaConexion = configuration.GetConnectionString("postgresRemote");
 
 
 //configuración de inyección de dependencias del DBContext
+//builder.Services.AddDbContext<BiblioContext>(
+//    options => options.UseMySql(cadenaConexion,
+//                                ServerVersion.AutoDetect(cadenaConexion)));
 builder.Services.AddDbContext<BiblioContext>(
-    options => options.UseMySql(cadenaConexion,
-                                ServerVersion.AutoDetect(cadenaConexion)));
+    options => options.UseNpgsql(cadenaConexion,
+        npgsqlOptions => npgsqlOptions.UseVector()));
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 // Configura el serializador JSON para manejar referencias cíclicas
 builder.Services.AddControllers()
@@ -58,6 +64,7 @@ builder.Services.AddControllers()
 
 
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddScoped<IGeminiService, GeminiService>();
 builder.Services.AddSwaggerGen(c =>
 {
 

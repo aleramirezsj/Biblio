@@ -11,5 +11,6 @@ namespace Service.Interfaces
     {
         Task<string?> GetPrompt(string textPrompt);
         Task<Libro?> GetLibroFromPortada(string imageUrl);
+        Task<float[]> CrearEmbeddingAsync(string texto);
     }
 }

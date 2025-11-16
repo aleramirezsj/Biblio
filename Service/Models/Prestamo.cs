@@ -13,13 +13,13 @@ namespace Service.Models
         public Usuario? Usuario { get; set; }
         public int EjemplarId { get; set; }
         public Ejemplar? Ejemplar { get; set; }
-        public DateTime FechaPrestamo { get; set; } = DateTime.Now;
-        public DateTime? FechaDevolucion { get; set; }
+        public DateTimeOffset FechaPrestamo { get; set; } = DateTime.UtcNow;
+        public DateTimeOffset? FechaDevolucion { get; set; }
         public bool IsDeleted { get; set; } = false;
 
         public override string ToString()
         {
-            return $"{Ejemplar?.Libro?.Titulo} - {FechaPrestamo.ToShortDateString()} - {FechaDevolucion?.ToShortDateString()}";
+            return $"{Ejemplar?.Libro?.Titulo} - {FechaPrestamo.ToString("dd/MM/yyyy")} - {FechaDevolucion?.ToString("dd/MM/yyyy")}";
         }
     }
 }

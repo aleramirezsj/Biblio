@@ -2,8 +2,11 @@ using Backend.DataContext;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Pgvector;
 using Service.DTOs;
+using Service.Interfaces;
 using Service.Models;
+using Service.Services;
 
 namespace Backend.Controllers
 {
@@ -13,10 +16,12 @@ namespace Backend.Controllers
     public class LibrosController : ControllerBase
     {
         private readonly BiblioContext _context;
+        private GeminiController _geminiController;
 
         public LibrosController(BiblioContext context)
         {
             _context = context;
+            _geminiController = new GeminiController();
         }
 
         // GET: api/Libros
@@ -166,6 +171,8 @@ namespace Backend.Controllers
         [HttpPost]
         public async Task<ActionResult<Libro>> PostLibro(Libro libro)
         {
+            var sinopsisFloats = await this._geminiController.CrearEmbeddingAsync(libro.Sinopsis ?? string.Empty);
+            libro.SinopsisEmbedding = new Vector(sinopsisFloats);
             _context.Libros.Add(libro);
             await _context.SaveChangesAsync();
 

@@ -3,17 +3,18 @@ using System;
 using Backend.DataContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using Pgvector;
 
 #nullable disable
 
 namespace Backend.Migrations
 {
     [DbContext(typeof(BiblioContext))]
-    [Migration("20250901193928_datosSemillaRestantes")]
-    partial class datosSemillaRestantes
+    [Migration("20251116160230_embedding3072")]
+    partial class embedding3072
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -21,24 +22,25 @@ namespace Backend.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "8.0.19")
-                .HasAnnotation("Relational:MaxIdentifierLength", 64);
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
+            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "vector");
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("Service.Models.Autor", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -111,16 +113,16 @@ namespace Backend.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -129,63 +131,57 @@ namespace Backend.Migrations
                     b.HasData(
                         new
                         {
-                            Id = 1,
+                            Id = 6,
                             IsDeleted = false,
-                            Nombre = "Ingeniería Informática"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            IsDeleted = false,
-                            Nombre = "Derecho"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            IsDeleted = false,
-                            Nombre = "Medicina"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            IsDeleted = false,
-                            Nombre = "Psicología"
+                            Nombre = "Profesorado de Educación Inicial"
                         },
                         new
                         {
                             Id = 5,
                             IsDeleted = false,
-                            Nombre = "Arquitectura"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            IsDeleted = false,
-                            Nombre = "Administración"
+                            Nombre = "Profesorado de Educ. Secundaria en Cs de la Administración"
                         },
                         new
                         {
                             Id = 7,
                             IsDeleted = false,
-                            Nombre = "Contabilidad"
+                            Nombre = "Profesorado de Educ. Secundaria en Economía"
                         },
                         new
                         {
                             Id = 8,
                             IsDeleted = false,
-                            Nombre = "Educación"
+                            Nombre = "Profesorado de Educación Tecnológica"
                         },
                         new
                         {
-                            Id = 9,
+                            Id = 1,
                             IsDeleted = false,
-                            Nombre = "Biología"
+                            Nombre = "Técnico Superior en Desarrollo de Software"
                         },
                         new
                         {
-                            Id = 10,
+                            Id = 4,
                             IsDeleted = false,
-                            Nombre = "Física"
+                            Nombre = "Técnico Superior en Enfermería"
+                        },
+                        new
+                        {
+                            Id = 22,
+                            IsDeleted = false,
+                            Nombre = "Tecnicatura Superior en Gestión de Energías Renovables"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            IsDeleted = false,
+                            Nombre = "Técnico Superior en Gestión de las Organizaciones"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            IsDeleted = false,
+                            Nombre = "Técnico Superior en Soporte de Infraestructura en Tecnologías de la Información"
                         });
                 });
 
@@ -193,16 +189,16 @@ namespace Backend.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -275,21 +271,21 @@ namespace Backend.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("Disponible")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<int>("Estado")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<int>("LibroId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -384,16 +380,16 @@ namespace Backend.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -466,53 +462,72 @@ namespace Backend.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("AnioPublicacion")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
+
+                    b.Property<string>("CDU")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("Descripcion")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("text");
 
                     b.Property<int>("EditorialId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Libristica")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<int>("Paginas")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PalabrasClave")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("Portada")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("text");
 
                     b.Property<string>("Sinopsis")
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<Vector>("SinopsisEmbedding")
+                        .HasColumnType("vector(3072)");
+
                     b.Property<string>("Titulo")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("EditorialId");
 
-                    b.ToTable("Libros");
+                    b.ToTable("Libros", (string)null);
 
                     b.HasData(
                         new
                         {
                             Id = 1,
                             AnioPublicacion = 1967,
+                            CDU = "",
                             Descripcion = "Novela emblemática",
                             EditorialId = 1,
                             IsDeleted = false,
+                            Libristica = "",
                             Paginas = 471,
+                            PalabrasClave = "",
                             Portada = "portada1.jpg",
                             Sinopsis = "La historia de la familia Buendía.",
                             Titulo = "Cien años de soledad"
@@ -521,10 +536,13 @@ namespace Backend.Migrations
                         {
                             Id = 2,
                             AnioPublicacion = 1982,
+                            CDU = "",
                             Descripcion = "Realismo mágico chileno",
                             EditorialId = 2,
                             IsDeleted = false,
+                            Libristica = "",
                             Paginas = 368,
+                            PalabrasClave = "",
                             Portada = "portada2.jpg",
                             Sinopsis = "Saga familiar de los Trueba.",
                             Titulo = "La casa de los espíritus"
@@ -533,10 +551,13 @@ namespace Backend.Migrations
                         {
                             Id = 3,
                             AnioPublicacion = 1969,
+                            CDU = "",
                             Descripcion = "Corrupción y dictadura",
                             EditorialId = 3,
                             IsDeleted = false,
+                            Libristica = "",
                             Paginas = 601,
+                            PalabrasClave = "",
                             Portada = "portada3.jpg",
                             Sinopsis = "La vida bajo la dictadura de Odría.",
                             Titulo = "Conversación en La Catedral"
@@ -545,10 +566,13 @@ namespace Backend.Migrations
                         {
                             Id = 4,
                             AnioPublicacion = 1923,
+                            CDU = "",
                             Descripcion = "Poesía argentina",
                             EditorialId = 4,
                             IsDeleted = false,
+                            Libristica = "",
                             Paginas = 120,
+                            PalabrasClave = "",
                             Portada = "portada4.jpg",
                             Sinopsis = "Primer libro de Borges.",
                             Titulo = "Fervor de Buenos Aires"
@@ -557,10 +581,13 @@ namespace Backend.Migrations
                         {
                             Id = 5,
                             AnioPublicacion = 1989,
+                            CDU = "",
                             Descripcion = "Novela de realismo mágico",
                             EditorialId = 5,
                             IsDeleted = false,
+                            Libristica = "",
                             Paginas = 256,
+                            PalabrasClave = "",
                             Portada = "portada5.jpg",
                             Sinopsis = "La historia de Tita y su cocina.",
                             Titulo = "Como agua para chocolate"
@@ -569,10 +596,13 @@ namespace Backend.Migrations
                         {
                             Id = 6,
                             AnioPublicacion = 1962,
+                            CDU = "",
                             Descripcion = "Novela mexicana",
                             EditorialId = 6,
                             IsDeleted = false,
+                            Libristica = "",
                             Paginas = 336,
+                            PalabrasClave = "",
                             Portada = "portada6.jpg",
                             Sinopsis = "La vida de Artemio Cruz.",
                             Titulo = "La muerte de Artemio Cruz"
@@ -581,10 +611,13 @@ namespace Backend.Migrations
                         {
                             Id = 7,
                             AnioPublicacion = 1963,
+                            CDU = "",
                             Descripcion = "Novela experimental",
                             EditorialId = 7,
                             IsDeleted = false,
+                            Libristica = "",
                             Paginas = 736,
+                            PalabrasClave = "",
                             Portada = "portada7.jpg",
                             Sinopsis = "La vida de Horacio Oliveira.",
                             Titulo = "Rayuela"
@@ -593,10 +626,13 @@ namespace Backend.Migrations
                         {
                             Id = 8,
                             AnioPublicacion = 1605,
+                            CDU = "",
                             Descripcion = "Clásico español",
                             EditorialId = 8,
                             IsDeleted = false,
+                            Libristica = "",
                             Paginas = 863,
+                            PalabrasClave = "",
                             Portada = "portada8.jpg",
                             Sinopsis = "Las aventuras de Don Quijote.",
                             Titulo = "Don Quijote de la Mancha"
@@ -605,10 +641,13 @@ namespace Backend.Migrations
                         {
                             Id = 9,
                             AnioPublicacion = 1924,
+                            CDU = "",
                             Descripcion = "Poesía chilena",
                             EditorialId = 9,
                             IsDeleted = false,
+                            Libristica = "",
                             Paginas = 64,
+                            PalabrasClave = "",
                             Portada = "portada9.jpg",
                             Sinopsis = "Poemas de amor de Neruda.",
                             Titulo = "Veinte poemas de amor"
@@ -617,10 +656,13 @@ namespace Backend.Migrations
                         {
                             Id = 10,
                             AnioPublicacion = 1950,
+                            CDU = "",
                             Descripcion = "Ensayo mexicano",
                             EditorialId = 10,
                             IsDeleted = false,
+                            Libristica = "",
                             Paginas = 228,
+                            PalabrasClave = "",
                             Portada = "portada10.jpg",
                             Sinopsis = "Reflexión sobre la identidad mexicana.",
                             Titulo = "El laberinto de la soledad"
@@ -631,18 +673,18 @@ namespace Backend.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("AutorId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<int>("LibroId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -729,18 +771,18 @@ namespace Backend.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("GeneroId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<int>("LibroId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -827,24 +869,24 @@ namespace Backend.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("EjemplarId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    b.Property<DateTime>("FechaDevolucion")
-                        .HasColumnType("datetime(6)");
+                    b.Property<DateTimeOffset?>("FechaDevolucion")
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTime>("FechaPrestamo")
-                        .HasColumnType("datetime(6)");
+                    b.Property<DateTimeOffset>("FechaPrestamo")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<int>("UsuarioId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -859,8 +901,8 @@ namespace Backend.Migrations
                         {
                             Id = 1,
                             EjemplarId = 1,
-                            FechaDevolucion = new DateTime(2023, 2, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            FechaPrestamo = new DateTime(2023, 2, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FechaDevolucion = new DateTimeOffset(new DateTime(2023, 2, 10, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            FechaPrestamo = new DateTimeOffset(new DateTime(2023, 2, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             IsDeleted = false,
                             UsuarioId = 1
                         },
@@ -868,8 +910,8 @@ namespace Backend.Migrations
                         {
                             Id = 2,
                             EjemplarId = 2,
-                            FechaDevolucion = new DateTime(2023, 2, 11, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            FechaPrestamo = new DateTime(2023, 2, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FechaDevolucion = new DateTimeOffset(new DateTime(2023, 2, 11, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            FechaPrestamo = new DateTimeOffset(new DateTime(2023, 2, 2, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             IsDeleted = false,
                             UsuarioId = 2
                         },
@@ -877,8 +919,8 @@ namespace Backend.Migrations
                         {
                             Id = 3,
                             EjemplarId = 3,
-                            FechaDevolucion = new DateTime(2023, 2, 12, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            FechaPrestamo = new DateTime(2023, 2, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FechaDevolucion = new DateTimeOffset(new DateTime(2023, 2, 12, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            FechaPrestamo = new DateTimeOffset(new DateTime(2023, 2, 3, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             IsDeleted = false,
                             UsuarioId = 3
                         },
@@ -886,8 +928,8 @@ namespace Backend.Migrations
                         {
                             Id = 4,
                             EjemplarId = 4,
-                            FechaDevolucion = new DateTime(2023, 2, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            FechaPrestamo = new DateTime(2023, 2, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FechaDevolucion = new DateTimeOffset(new DateTime(2023, 2, 13, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            FechaPrestamo = new DateTimeOffset(new DateTime(2023, 2, 4, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             IsDeleted = false,
                             UsuarioId = 4
                         },
@@ -895,8 +937,8 @@ namespace Backend.Migrations
                         {
                             Id = 5,
                             EjemplarId = 5,
-                            FechaDevolucion = new DateTime(2023, 2, 14, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            FechaPrestamo = new DateTime(2023, 2, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FechaDevolucion = new DateTimeOffset(new DateTime(2023, 2, 14, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            FechaPrestamo = new DateTimeOffset(new DateTime(2023, 2, 5, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             IsDeleted = false,
                             UsuarioId = 5
                         },
@@ -904,8 +946,8 @@ namespace Backend.Migrations
                         {
                             Id = 6,
                             EjemplarId = 6,
-                            FechaDevolucion = new DateTime(2023, 2, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            FechaPrestamo = new DateTime(2023, 2, 6, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FechaDevolucion = new DateTimeOffset(new DateTime(2023, 2, 15, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            FechaPrestamo = new DateTimeOffset(new DateTime(2023, 2, 6, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             IsDeleted = false,
                             UsuarioId = 6
                         },
@@ -913,8 +955,8 @@ namespace Backend.Migrations
                         {
                             Id = 7,
                             EjemplarId = 7,
-                            FechaDevolucion = new DateTime(2023, 2, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            FechaPrestamo = new DateTime(2023, 2, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FechaDevolucion = new DateTimeOffset(new DateTime(2023, 2, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            FechaPrestamo = new DateTimeOffset(new DateTime(2023, 2, 7, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             IsDeleted = false,
                             UsuarioId = 7
                         },
@@ -922,8 +964,8 @@ namespace Backend.Migrations
                         {
                             Id = 8,
                             EjemplarId = 8,
-                            FechaDevolucion = new DateTime(2023, 2, 17, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            FechaPrestamo = new DateTime(2023, 2, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FechaDevolucion = new DateTimeOffset(new DateTime(2023, 2, 17, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            FechaPrestamo = new DateTimeOffset(new DateTime(2023, 2, 8, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             IsDeleted = false,
                             UsuarioId = 8
                         },
@@ -931,8 +973,8 @@ namespace Backend.Migrations
                         {
                             Id = 9,
                             EjemplarId = 9,
-                            FechaDevolucion = new DateTime(2023, 2, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            FechaPrestamo = new DateTime(2023, 2, 9, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FechaDevolucion = new DateTimeOffset(new DateTime(2023, 2, 18, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            FechaPrestamo = new DateTimeOffset(new DateTime(2023, 2, 9, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             IsDeleted = false,
                             UsuarioId = 9
                         },
@@ -940,8 +982,8 @@ namespace Backend.Migrations
                         {
                             Id = 10,
                             EjemplarId = 10,
-                            FechaDevolucion = new DateTime(2023, 2, 19, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            FechaPrestamo = new DateTime(2023, 2, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FechaDevolucion = new DateTimeOffset(new DateTime(2023, 2, 19, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            FechaPrestamo = new DateTimeOffset(new DateTime(2023, 2, 10, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             IsDeleted = false,
                             UsuarioId = 10
                         });
@@ -951,46 +993,46 @@ namespace Backend.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Dni")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("text");
 
                     b.Property<string>("Domicilio")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("text");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("text");
 
-                    b.Property<DateTime>("FechaRegistracion")
-                        .HasColumnType("datetime(6)");
+                    b.Property<DateTimeOffset>("FechaRegistracion")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("text");
 
                     b.Property<string>("Observacion")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("text");
 
                     b.Property<string>("Password")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("text");
 
                     b.Property<string>("Telefono")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("text");
 
                     b.Property<int>("TipoRol")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -1003,7 +1045,7 @@ namespace Backend.Migrations
                             Dni = "10000001",
                             Domicilio = "Calle 1",
                             Email = "juan1@mail.com",
-                            FechaRegistracion = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FechaRegistracion = new DateTimeOffset(new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             IsDeleted = false,
                             Nombre = "Juan Pérez",
                             Observacion = "",
@@ -1017,7 +1059,7 @@ namespace Backend.Migrations
                             Dni = "10000002",
                             Domicilio = "Calle 2",
                             Email = "ana2@mail.com",
-                            FechaRegistracion = new DateTime(2023, 1, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FechaRegistracion = new DateTimeOffset(new DateTime(2023, 1, 2, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             IsDeleted = false,
                             Nombre = "Ana Gómez",
                             Observacion = "",
@@ -1031,7 +1073,7 @@ namespace Backend.Migrations
                             Dni = "10000003",
                             Domicilio = "Calle 3",
                             Email = "luis3@mail.com",
-                            FechaRegistracion = new DateTime(2023, 1, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FechaRegistracion = new DateTimeOffset(new DateTime(2023, 1, 3, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             IsDeleted = false,
                             Nombre = "Luis Torres",
                             Observacion = "",
@@ -1045,7 +1087,7 @@ namespace Backend.Migrations
                             Dni = "10000004",
                             Domicilio = "Calle 4",
                             Email = "maria4@mail.com",
-                            FechaRegistracion = new DateTime(2023, 1, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FechaRegistracion = new DateTimeOffset(new DateTime(2023, 1, 4, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             IsDeleted = false,
                             Nombre = "María López",
                             Observacion = "",
@@ -1059,7 +1101,7 @@ namespace Backend.Migrations
                             Dni = "10000005",
                             Domicilio = "Calle 5",
                             Email = "pedro5@mail.com",
-                            FechaRegistracion = new DateTime(2023, 1, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FechaRegistracion = new DateTimeOffset(new DateTime(2023, 1, 5, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             IsDeleted = false,
                             Nombre = "Pedro Ruiz",
                             Observacion = "",
@@ -1073,7 +1115,7 @@ namespace Backend.Migrations
                             Dni = "10000006",
                             Domicilio = "Calle 6",
                             Email = "lucia6@mail.com",
-                            FechaRegistracion = new DateTime(2023, 1, 6, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FechaRegistracion = new DateTimeOffset(new DateTime(2023, 1, 6, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             IsDeleted = false,
                             Nombre = "Lucía Fernández",
                             Observacion = "",
@@ -1087,7 +1129,7 @@ namespace Backend.Migrations
                             Dni = "10000007",
                             Domicilio = "Calle 7",
                             Email = "carlos7@mail.com",
-                            FechaRegistracion = new DateTime(2023, 1, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FechaRegistracion = new DateTimeOffset(new DateTime(2023, 1, 7, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             IsDeleted = false,
                             Nombre = "Carlos Díaz",
                             Observacion = "",
@@ -1101,7 +1143,7 @@ namespace Backend.Migrations
                             Dni = "10000008",
                             Domicilio = "Calle 8",
                             Email = "sofia8@mail.com",
-                            FechaRegistracion = new DateTime(2023, 1, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FechaRegistracion = new DateTimeOffset(new DateTime(2023, 1, 8, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             IsDeleted = false,
                             Nombre = "Sofía Ramírez",
                             Observacion = "",
@@ -1115,7 +1157,7 @@ namespace Backend.Migrations
                             Dni = "10000009",
                             Domicilio = "Calle 9",
                             Email = "miguel9@mail.com",
-                            FechaRegistracion = new DateTime(2023, 1, 9, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FechaRegistracion = new DateTimeOffset(new DateTime(2023, 1, 9, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             IsDeleted = false,
                             Nombre = "Miguel Castro",
                             Observacion = "",
@@ -1129,7 +1171,7 @@ namespace Backend.Migrations
                             Dni = "10000010",
                             Domicilio = "Calle 10",
                             Email = "elena10@mail.com",
-                            FechaRegistracion = new DateTime(2023, 1, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FechaRegistracion = new DateTimeOffset(new DateTime(2023, 1, 10, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             IsDeleted = false,
                             Nombre = "Elena Vargas",
                             Observacion = "",
@@ -1143,18 +1185,18 @@ namespace Backend.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("CarreraId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<int>("UsuarioId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -1224,16 +1266,9 @@ namespace Backend.Migrations
                         new
                         {
                             Id = 9,
-                            CarreraId = 9,
+                            CarreraId = 22,
                             IsDeleted = false,
                             UsuarioId = 9
-                        },
-                        new
-                        {
-                            Id = 10,
-                            CarreraId = 10,
-                            IsDeleted = false,
-                            UsuarioId = 10
                         });
                 });
 
@@ -1268,7 +1303,7 @@ namespace Backend.Migrations
                         .IsRequired();
 
                     b.HasOne("Service.Models.Libro", "Libro")
-                        .WithMany()
+                        .WithMany("LibrosAutores")
                         .HasForeignKey("LibroId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1287,7 +1322,7 @@ namespace Backend.Migrations
                         .IsRequired();
 
                     b.HasOne("Service.Models.Libro", "Libro")
-                        .WithMany()
+                        .WithMany("LibrosGeneros")
                         .HasForeignKey("LibroId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1325,7 +1360,7 @@ namespace Backend.Migrations
                         .IsRequired();
 
                     b.HasOne("Service.Models.Usuario", "Usuario")
-                        .WithMany()
+                        .WithMany("CarrerasInscriptas")
                         .HasForeignKey("UsuarioId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1333,6 +1368,18 @@ namespace Backend.Migrations
                     b.Navigation("Carrera");
 
                     b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("Service.Models.Libro", b =>
+                {
+                    b.Navigation("LibrosAutores");
+
+                    b.Navigation("LibrosGeneros");
+                });
+
+            modelBuilder.Entity("Service.Models.Usuario", b =>
+                {
+                    b.Navigation("CarrerasInscriptas");
                 });
 #pragma warning restore 612, 618
         }
